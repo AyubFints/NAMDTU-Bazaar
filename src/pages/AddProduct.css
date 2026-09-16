@@ -1,0 +1,80 @@
+.add-product-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.add-product-card {
+  width: 100%;
+  max-width: 800px;
+  padding: 40px;
+}
+
+.card-header {
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.card-header h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.card-header p {
+  color: var(--text-muted);
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.upload-area {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 40px 20px;
+  text-align: center;
+  background-color: var(--bg-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.upload-area:hover {
+  border-color: var(--primary);
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+.upload-icon {
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+
+.upload-area p {
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.upload-area p span {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.upload-hint {
+  font-size: 13px;
+  color: var(--text-muted) !important;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
