@@ -15,6 +15,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [selectedSize, setSelectedSize] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
@@ -28,6 +29,7 @@ const ProductDetail = () => {
   // Load product
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
         const { data } = await api.get('/products');
         setAllProducts(data);
@@ -36,6 +38,8 @@ const ProductDetail = () => {
         setProduct(found || null);
       } catch (error) {
         console.error("Failed to load products", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -86,6 +90,32 @@ const ProductDetail = () => {
     }
     return stars;
   };
+
+  if (loading) {
+    return (
+      <div className="pd-wrapper">
+        <div className="pd-main">
+          {/* Image skeleton */}
+          <div className="pd-gallery">
+            <div className="skeleton" style={{width:'100%', aspectRatio:'1/1', borderRadius:'16px', marginBottom:'12px'}}></div>
+            <div style={{display:'flex', gap:'8px'}}>
+              {[1,2,3].map(i => <div key={i} className="skeleton" style={{width:'64px', height:'64px', borderRadius:'10px'}}></div>)}
+            </div>
+          </div>
+          {/* Info skeleton */}
+          <div className="pd-info">
+            <div className="skeleton" style={{height:'16px', width:'40%', marginBottom:'12px'}}></div>
+            <div className="skeleton" style={{height:'28px', width:'85%', marginBottom:'8px'}}></div>
+            <div className="skeleton" style={{height:'28px', width:'60%', marginBottom:'20px'}}></div>
+            <div className="skeleton" style={{height:'36px', width:'50%', marginBottom:'16px'}}></div>
+            <div className="skeleton" style={{height:'20px', width:'35%', marginBottom:'24px'}}></div>
+            <div className="skeleton" style={{height:'52px', width:'100%', borderRadius:'12px', marginBottom:'12px'}}></div>
+            <div className="skeleton" style={{height:'52px', width:'100%', borderRadius:'12px'}}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
