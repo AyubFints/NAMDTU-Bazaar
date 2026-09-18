@@ -65,7 +65,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const getCartCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    return cart.length;
   };
 
   const getCartItem = (productId) => {

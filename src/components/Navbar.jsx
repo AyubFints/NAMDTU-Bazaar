@@ -155,8 +155,13 @@ const Navbar = () => {
 
         {/* Mobile menu button */}
         <div className="mobile-menu-wrapper" ref={menuRef}>
-          <button className="mobile-menu-btn" onClick={toggleMenu}>
+          <button className="mobile-menu-btn" onClick={toggleMenu} style={{ position: 'relative' }}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            {!menuOpen && getCartCount() > 0 && (
+              <span className="nav-badge" style={{ position: 'absolute', top: -5, right: -5, width: 16, height: 16, fontSize: 10 }}>
+                {getCartCount()}
+              </span>
+            )}
           </button>
 
           {/* Mobile dropdown */}
@@ -184,8 +189,15 @@ const Navbar = () => {
               <span>{t('favorites')}</span>
             </Link>
             <Link to="/cart" className="mobile-link" onClick={() => setMenuOpen(false)}>
-              <ShoppingCart size={20} />
-              <span>{t('cart')}</span>
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <ShoppingCart size={20} />
+                {getCartCount() > 0 && (
+                  <span className="nav-badge" style={{ position: 'absolute', top: -8, right: -10, width: 16, height: 16, fontSize: 10 }}>
+                    {getCartCount()}
+                  </span>
+                )}
+              </div>
+              <span style={{ marginLeft: '12px' }}>{t('cart')}</span>
             </Link>
             <Link to="/orders" className="mobile-link" onClick={() => setMenuOpen(false)}>
               <ShoppingBag size={20} />
