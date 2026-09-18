@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Package, FolderPlus, ShoppingBag, Plus, Trash2, Image, Save, X, Edit2 } from 'lucide-react';
+import api from '../api/axios';
 import './AdminPanel.css';
-
 const HERO_SLIDES = [
   {
     id: 1,
@@ -31,11 +31,9 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   // Categories state
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem('categories');
-    return saved ? JSON.parse(saved) : ['Trendli kiyimlar', 'Onalar va bolalar', "Qo'l ishlari"];
-  });
-  const [newCategory, setNewCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryVariants, setNewCategoryVariants] = useState('');
 
   // Product form state
   const [productName, setProductName] = useState('');
@@ -52,10 +50,24 @@ const AdminPanel = () => {
   const [editingProductId, setEditingProductId] = useState(null);
 
   // Products list
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('products');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [products, setProducts] = useState([]);
+
+  // Fetch products and categories from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          api.get('/products/admin'),
+          api.get('/categories')
+        ]);
+        setProducts(productsRes.data);
+        setCategories(categoriesRes.data);
+      } catch (error) {
+        console.error("Failed to load data in admin", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Notifications
   const [notifications, setNotifications] = useState(() => {
@@ -64,11 +76,20 @@ const AdminPanel = () => {
   });
 
   // Orders list
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('orders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState([]);
   const newOrdersCount = orders.filter(o => o.status === 'Yangi').length;
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const { data } = await api.get('/orders');
+        setOrders(data);
+      } catch (error) {
+        console.error("Failed to load orders in admin", error);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   // Banners list
   const [banners, setBanners] = useState(() => {
@@ -88,14 +109,7 @@ const AdminPanel = () => {
   // Success message
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories));
-  }, [categories]);
 
-  useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products));
-  }, [products]);
 
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
@@ -140,62 +154,59 @@ const AdminPanel = () => {
   };
 
   // Add or Update product
-  const handleAddProduct = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!productName || !productPrice || !productCategory) return;
 
-    if (editingProductId) {
-      const updatedProducts = products.map(p => {
-        if (p.id === editingProductId) {
-          return {
-            ...p,
-            name: productName,
-            price: productPrice,
-            category: productCategory,
-            images: productImagePreviews.length > 0 ? productImagePreviews : (p.images || (p.image ? [p.image] : [])),
-            description: productDescription,
-            oldPrice: productOldPrice,
-            badge: productBadge,
-            brand: productBrand,
-            stock: productStock,
-            sizes: productSizes,
-          };
-        }
-        return p;
-      });
-      setProducts(updatedProducts);
-      setEditingProductId(null);
-      showSuccess('Mahsulot muvaffaqiyatli o\'zgartirildi!');
-    } else {
-      const newProduct = {
-        id: Date.now(),
-        name: productName,
-        price: productPrice,
-        category: productCategory,
-        images: productImagePreviews.length > 0 ? productImagePreviews : [],
-        description: productDescription,
-        oldPrice: productOldPrice,
-        badge: productBadge,
-        brand: productBrand,
-        stock: productStock,
-        sizes: productSizes,
-        createdAt: new Date().toLocaleDateString('uz-UZ'),
-      };
-      setProducts([newProduct, ...products]);
-      showSuccess('Mahsulot muvaffaqiyatli qo\'shildi!');
-    }
+    try {
+      if (editingProductId) {
+        const { data } = await api.put(`/products/${editingProductId}`, {
+          name: productName,
+          price: productPrice,
+          category: productCategory,
+          images: productImagePreviews.length > 0 ? productImagePreviews : [],
+          description: productDescription,
+          oldPrice: productOldPrice,
+          badge: productBadge,
+          brand: productBrand,
+          stock: productStock,
+          sizes: productSizes,
+        });
+        
+        setProducts(products.map(p => p.id === editingProductId ? data : p));
+        setEditingProductId(null);
+        showSuccess('Mahsulot muvaffaqiyatli o\'zgartirildi!');
+      } else {
+        const { data } = await api.post('/products', {
+          name: productName,
+          price: productPrice,
+          category: productCategory,
+          images: productImagePreviews.length > 0 ? productImagePreviews : [],
+          description: productDescription,
+          oldPrice: productOldPrice,
+          badge: productBadge,
+          brand: productBrand,
+          stock: productStock,
+          sizes: productSizes,
+        });
+        setProducts([data, ...products]);
+        showSuccess('Mahsulot muvaffaqiyatli qo\'shildi!');
+      }
 
-    setProductName('');
-    setProductPrice('');
-    setProductCategory('');
-    setProductImages([]);
-    setProductImagePreviews([]);
-    setProductDescription('');
-    setProductOldPrice('');
-    setProductBadge('');
-    setProductBrand('');
-    setProductStock('');
-    setProductSizes([]);
+      setProductName('');
+      setProductPrice('');
+      setProductCategory('');
+      setProductImages([]);
+      setProductImagePreviews([]);
+      setProductDescription('');
+      setProductOldPrice('');
+      setProductBadge('');
+      setProductBrand('');
+      setProductStock('');
+      setProductSizes([]);
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const handleEditProduct = (product) => {
@@ -215,22 +226,40 @@ const AdminPanel = () => {
   };
 
   // Add category
-  const handleAddCategory = (e) => {
+  const handleAddCategory = async (e) => {
     e.preventDefault();
-    if (!newCategory.trim()) return;
-    if (categories.includes(newCategory.trim())) {
-      showSuccess('Bu bo\'lim allaqachon mavjud!');
-      return;
+    if (!newCategoryName.trim()) return;
+    
+    try {
+      let vars = [];
+      if (newCategoryVariants.trim()) {
+        vars = newCategoryVariants.split(',').map(v => v.trim()).filter(v => v);
+      }
+      
+      const { data } = await api.post('/categories', { 
+        name: newCategoryName.trim(), 
+        variants: vars 
+      });
+      setCategories([...categories, data]);
+      setNewCategoryName('');
+      setNewCategoryVariants('');
+      showSuccess('Yangi bo\'lim yaratildi!');
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
     }
-    setCategories([...categories, newCategory.trim()]);
-    setNewCategory('');
-    showSuccess('Yangi bo\'lim yaratildi!');
   };
 
   // Delete product
-  const handleDeleteProduct = (id) => {
-    setProducts(products.filter(p => p.id !== id));
-    showSuccess('Mahsulot o\'chirildi!');
+  const handleDeleteProduct = async (id) => {
+    if (window.confirm("Rostdan ham bu mahsulotni o'chirmoqchimisiz?")) {
+      try {
+        await api.delete(`/products/${id}`);
+        setProducts(products.filter(p => p.id !== id));
+        showSuccess('Mahsulot o\'chirildi!');
+      } catch (error) {
+        alert("Xatolik: " + (error.response?.data?.message || error.message));
+      }
+    }
   };
 
   // Product Approval Workflow
@@ -269,9 +298,16 @@ const AdminPanel = () => {
   };
 
   // Delete category
-  const handleDeleteCategory = (cat) => {
-    setCategories(categories.filter(c => c !== cat));
-    showSuccess('Bo\'lim o\'chirildi!');
+  const handleDeleteCategory = async (id) => {
+    if (window.confirm("Rostdan ham bu bo'limni o'chirmoqchimisiz?")) {
+      try {
+        await api.delete(`/categories/${id}`);
+        setCategories(categories.filter(c => c.id !== id));
+        showSuccess('Bo\'lim o\'chirildi!');
+      } catch (error) {
+        alert("Xatolik: " + (error.response?.data?.message || error.message));
+      }
+    }
   };
 
   const showSuccess = (msg) => {
@@ -522,15 +558,34 @@ const AdminPanel = () => {
                   </div>
 
                   <div className="admin-field">
+                    <label>Eski narx (ixtiyoriy)</label>
+                    <input
+                      type="text"
+                      placeholder="Masalan: 200000"
+                      value={productOldPrice}
+                      onChange={(e) => setProductOldPrice(e.target.value.replace(/\D/g, ''))}
+                    />
+                  </div>
+
+                  <div className="admin-field">
                     <label>Bo'limni tanlang</label>
                     <select
                       value={productCategory}
-                      onChange={(e) => setProductCategory(e.target.value)}
+                      onChange={(e) => {
+                        const newCat = e.target.value;
+                        setProductCategory(newCat);
+                        const selectedCatObj = categories.find(c => c.name === newCat);
+                        if (selectedCatObj && selectedCatObj.variants && selectedCatObj.variants.length > 0) {
+                          setProductSizes(selectedCatObj.variants.map(v => ({ size: v, stock: '' })));
+                        } else {
+                          setProductSizes([]);
+                        }
+                      }}
                       required
                     >
                       <option value="">-- Tanlang --</option>
-                      {categories.map((cat, i) => (
-                        <option key={i} value={cat}>{cat}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
                       ))}
                     </select>
                   </div>
@@ -545,17 +600,30 @@ const AdminPanel = () => {
                     />
                   </div>
 
-                  <div className="admin-field" style={{ display: 'flex', gap: '16px' }}>
-                    <div style={{ flex: 1 }}>
-                      <label>Eski narx (ixtiyoriy)</label>
-                      <input
-                        type="text"
-                        placeholder="Masalan: 200000"
-                        value={productOldPrice}
-                        onChange={(e) => setProductOldPrice(e.target.value.replace(/\D/g, ''))}
-                      />
+                  {productSizes.length > 0 ? (
+                    <div className="admin-field">
+                      <label>Razmerlar bo'yicha zaxira</label>
+                      <div className="admin-sizes-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
+                        {productSizes.map((sz, idx) => (
+                          <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '500' }}>{sz.size}</span>
+                            <input
+                              type="number"
+                              placeholder="Soni"
+                              value={sz.stock}
+                              onChange={(e) => {
+                                const newSizes = [...productSizes];
+                                newSizes[idx].stock = e.target.value;
+                                setProductSizes(newSizes);
+                              }}
+                              style={{ padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px' }}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
+                  ) : (
+                    <div className="admin-field">
                       <label>Ombordagi soni</label>
                       <input
                         type="number"
@@ -564,7 +632,7 @@ const AdminPanel = () => {
                         onChange={(e) => setProductStock(e.target.value)}
                       />
                     </div>
-                  </div>
+                  )}
 
                   <div className="admin-field">
                     <label>Maxsus Yorliq (Badge)</label>
@@ -588,53 +656,6 @@ const AdminPanel = () => {
                       onChange={(e) => setProductDescription(e.target.value)}
                       rows={3}
                     />
-                  </div>
-
-                  <div className="admin-field">
-                    <label>Razmerlar va ularning zaxirasi (ixtiyoriy)</label>
-                    <div className="admin-sizes-list">
-                      {productSizes.map((sz, idx) => (
-                        <div key={idx} className="admin-size-item">
-                          <span>{sz.size} - {sz.stock} ta</span>
-                          <button type="button" onClick={() => {
-                            setProductSizes(productSizes.filter((_, i) => i !== idx));
-                          }}><X size={14} /></button>
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                      <input
-                        type="text"
-                        id="new-size-name"
-                        placeholder="Razmer (M, 42, va hokazo)"
-                        style={{ flex: 1 }}
-                      />
-                      <input
-                        type="number"
-                        id="new-size-stock"
-                        placeholder="Soni"
-                        style={{ width: '80px' }}
-                      />
-                      <button
-                        type="button"
-                        className="btn"
-                        style={{ padding: '0 12px' }}
-                        onClick={() => {
-                          const name = document.getElementById('new-size-name').value.trim();
-                          const stock = parseInt(document.getElementById('new-size-stock').value, 10);
-                          if (name && stock > 0) {
-                            setProductSizes([...productSizes, { size: name, stock }]);
-                            document.getElementById('new-size-name').value = '';
-                            document.getElementById('new-size-stock').value = '';
-                          }
-                        }}
-                      >
-                        Qo'shish
-                      </button>
-                    </div>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                      * Agar razmerlar kiritsangiz, yuqoridagi "Ombordagi soni" inobatga olinmaydi. Zaxira razmerlarga qarab hisoblanadi.
-                    </p>
                   </div>
                 </div>
 
@@ -801,28 +822,47 @@ const AdminPanel = () => {
               <div className="admin-field" style={{ flex: 1 }}>
                 <input
                   type="text"
-                  placeholder="Yangi bo'lim nomi (Masalan: Kuzgi kiyimlar)"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Yangi bo'lim nomi (Masalan: Kiyimlar)"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
                   required
                 />
               </div>
-              <button type="submit" className="admin-add-cat-btn">
+              <div className="admin-field" style={{ flex: 2 }}>
+                <input
+                  type="text"
+                  placeholder="Variant/O'lchamlar (vergul bn ajrating: XS, S, M yoki 1L, 2L)"
+                  value={newCategoryVariants}
+                  onChange={(e) => setNewCategoryVariants(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="admin-add-cat-btn" style={{ height: '42px', marginTop: '0' }}>
                 <Plus size={20} />
                 <span>Qo'shish</span>
               </button>
             </form>
 
             <div className="admin-categories-list">
-              {categories.map((cat, i) => (
-                <div key={i} className="admin-category-item">
-                  <div className="admin-cat-info">
-                    <FolderPlus size={20} />
-                    <span>{cat}</span>
+              {categories.map((cat) => (
+                <div key={cat.id} className="admin-category-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <div className="admin-cat-info">
+                      <FolderPlus size={20} />
+                      <span style={{ fontWeight: '600' }}>{cat.name}</span>
+                    </div>
+                    <button className="admin-delete-btn" onClick={() => handleDeleteCategory(cat.id)}>
+                      <Trash2 size={16} />
+                    </button>
                   </div>
-                  <button className="admin-delete-btn" onClick={() => handleDeleteCategory(cat)}>
-                    <Trash2 size={16} />
-                  </button>
+                  {cat.variants && cat.variants.length > 0 && (
+                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {cat.variants.map((v, i) => (
+                        <span key={i} style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', color: '#475569' }}>
+                          {v}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

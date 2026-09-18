@@ -7,7 +7,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handlePhoneChange = (e) => {
@@ -23,14 +23,18 @@ const Register = () => {
     setPhone(formatted);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    let role = 'user';
     if (name === 'Admin' && phone === '91 000 00 00' && password === 'Admin001') {
-      login({ name: 'Admin', role: 'admin', phone });
-      navigate('/admin');
+      role = 'admin';
+    }
+    
+    const result = await register(name, phone, password, role);
+    if (result.success) {
+      navigate(role === 'admin' ? '/admin' : '/');
     } else {
-      login({ name: name || 'Foydalanuvchi', role: 'user', phone });
-      navigate('/');
+      alert(result.message);
     }
   };
 

@@ -1,17 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, ChevronLeft, Image, Send, Camera, X, Minus, Plus } from 'lucide-react';
+import { Heart, Star, ChevronLeft, ChevronRight, Minus, Plus, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import api from '../api/axios';
 import './ProductDetail.css';
-
-const MOCK_PRODUCTS = [
-  { id: 1, name: "Qo'lda to'qilgan qishki sharf", price: "45000", image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500&auto=format&fit=crop&q=60", author: "Malika", category: "Kiyim" },
-  { id: 2, name: "Yog'ochdan ishlangan qalamdon", price: "25000", image: "https://images.unsplash.com/photo-1590725140246-2003eaeb705e?w=500&auto=format&fit=crop&q=60", author: "Sardor", category: "Hunar" },
-  { id: 3, name: "Eko-sumka (Shopper)", price: "30000", image: "https://images.unsplash.com/photo-1597484661643-2f5fef640eb1?w=500&auto=format&fit=crop&q=60", author: "Zuhra", category: "Aksessuar" },
-  { id: 4, name: "Milliylashtirilgan zamonaviy ko'ylak", price: "120000", image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&auto=format&fit=crop&q=60", author: "Kamola", category: "Kiyim" },
-];
+import './Home.css'; // For .product-card styles
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,138 +15,74 @@ const ProductDetail = () => {
   const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
   const [selectedSize, setSelectedSize] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [reviews, setReviews] = useState([]);
-  const reviewsRef = useRef(null);
-  const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
-  
-  const scrollToReviews = () => {
-    reviewsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const [activeTab, setActiveTab] = useState('description');
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
-  const [reviewPros, setReviewPros] = useState('');
-  const [reviewCons, setReviewCons] = useState('');
-  const [reviewComment, setReviewComment] = useState('');
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewImages, setReviewImages] = useState([]);
-  const [reviewImagePreviews, setReviewImagePreviews] = useState([]);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [userPhotos, setUserPhotos] = useState([]);
+  const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
 
   // Load product
   useEffect(() => {
-    const numId = Number(id);
-    // Check admin products first
-    const savedProducts = localStorage.getItem('products');
-    let found = null;
-    if (savedProducts) {
-      const adminProducts = JSON.parse(savedProducts);
-      found = adminProducts.find(p => p.id === numId);
-    }
-    if (!found) {
-      found = MOCK_PRODUCTS.find(p => p.id === numId);
-    }
-    setProduct(found || null);
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get('/products');
+        setAllProducts(data);
+        const numId = Number(id);
+        const found = data.find(p => p.id === numId);
+        setProduct(found || null);
+      } catch (error) {
+        console.error("Failed to load products", error);
+      }
+    };
+    fetchProducts();
 
-    // Load reviews
+    const numId = Number(id);
     const savedReviews = localStorage.getItem(`reviews_${numId}`);
     if (savedReviews) {
       setReviews(JSON.parse(savedReviews));
-    }
-
-    // Load user photos
-    const savedPhotos = localStorage.getItem(`user_photos_${numId}`);
-    if (savedPhotos) {
-      setUserPhotos(JSON.parse(savedPhotos));
+    } else {
+      // Add dummy reviews if empty for display purposes
+      setReviews([
+        { id: 1, author: "shaxzoda", date: "8 Aprel", rating: 5, size: "110" },
+        { id: 2, author: "shaxzoda", date: "8 Aprel", rating: 5, size: "116" }
+      ]);
     }
 
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Save reviews
   useEffect(() => {
-    if (reviews.length > 0) {
-      localStorage.setItem(`reviews_${id}`, JSON.stringify(reviews));
-    }
-  }, [reviews, id]);
-
-  // Save user photos
-  useEffect(() => {
-    if (userPhotos.length > 0) {
-      localStorage.setItem(`user_photos_${id}`, JSON.stringify(userPhotos));
-    }
-  }, [userPhotos, id]);
-
-  const handleReviewImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReviewImagePreviews(prev => [...prev, reader.result]);
-        setReviewImages(prev => [...prev, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeReviewImage = (index) => {
-    setReviewImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setReviewImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmitReview = (e) => {
-    e.preventDefault();
-
-    const newReview = {
-      id: Date.now(),
-      author: user ? user.name : 'Mehmon',
-      date: new Date().toLocaleDateString('uz-UZ'),
-      rating: reviewRating,
-      pros: reviewPros,
-      cons: reviewCons,
-      comment: reviewComment,
-      images: reviewImages,
+    const handleScroll = () => {
+      // Show sticky bar when scrolled past 500px
+      if (window.scrollY > 500) {
+        setShowStickyBar(true);
+      } else {
+        setShowStickyBar(false);
+      }
     };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    setReviews(prev => [newReview, ...prev]);
-
-    // Add review images to user photos gallery
-    if (reviewImages.length > 0) {
-      setUserPhotos(prev => [...reviewImages, ...prev]);
-    }
-
-    setReviewPros('');
-    setReviewCons('');
-    setReviewComment('');
-    setReviewRating(5);
-    setReviewImages([]);
-    setReviewImagePreviews([]);
-  };
-
-  // Calculate average rating
   const avgRating = reviews.length > 0
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : '0';
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(0)
+    : '5';
 
   const renderStars = (rating, size = 16) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
-      if (i <= Math.floor(rating)) {
-        stars.push(<Star key={i} size={size} fill="#f59e0b" color="#f59e0b" />);
-      } else if (i === Math.ceil(rating) && rating % 1 !== 0) {
-        // Half star
-        stars.push(
-          <div key={i} style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
-            <Star size={size} color="#e2e8f0" fill="#e2e8f0" />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: `${(rating % 1) * 100}%`, overflow: 'hidden' }}>
-              <Star size={size} fill="#f59e0b" color="#f59e0b" />
-            </div>
-          </div>
-        );
-      } else {
-        stars.push(<Star key={i} size={size} color="#e2e8f0" fill="#e2e8f0" />);
-      }
+      stars.push(
+        <Star 
+          key={i} 
+          size={size} 
+          fill={i <= rating ? "#f59e0b" : "#e2e8f0"} 
+          color={i <= rating ? "#f59e0b" : "#e2e8f0"} 
+        />
+      );
     }
     return stars;
   };
@@ -176,369 +107,431 @@ const ProductDetail = () => {
   const numericOldPrice = product.oldPrice ? parseFloat(String(product.oldPrice).replace(/\D/g, '')) : 0;
   const formatMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
 
+  const cartItemId = selectedSize ? `${product.id}_${selectedSize}` : product.id;
+  const cartItem = getCartItem(cartItemId);
+  let maxStock = product.stock ? parseInt(product.stock, 10) : 999;
+  if (product.sizes && product.sizes.length > 0 && selectedSize) {
+    const szObj = product.sizes.find(s => s.size === selectedSize);
+    maxStock = szObj ? parseInt(szObj.stock, 10) : 0;
+  }
+
+  const handleAddToCart = () => {
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      alert('Iltimos, avval razmerni tanlang!');
+      return;
+    }
+    addToCart({ ...product, id: cartItemId, originalId: product.id, size: selectedSize });
+  };
+
   return (
     <div className="pd-page">
-      {/* Back button */}
-      <button className="pd-back" onClick={() => navigate(-1)}>
-        <ChevronLeft size={20} />
-        <span>Orqaga</span>
-      </button>
-
-      {/* Top section: Image + Info */}
-      <div className="pd-top">
-        {/* Images */}
-        <div className="pd-images">
-          <div className="pd-main-image">
-            <img src={productImages[activeImage]} alt={product.name} />
-            <button
-              className={`favorite-btn ${isFavorite(product.id) ? 'active' : ''}`}
-              onClick={() => toggleFavorite(product)}
-            >
-              <Heart
-                size={24}
-                fill={isFavorite(product.id) ? '#ef4444' : 'none'}
-                color={isFavorite(product.id) ? '#ef4444' : '#6b7280'}
-              />
-            </button>
-            {product.badge && (
-              <span className="pd-badge">{product.badge}</span>
-            )}
-          </div>
-          {productImages.length > 1 && (
-            <div className="pd-thumbs">
-              {productImages.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`pd-thumb ${idx === activeImage ? 'active' : ''}`}
-                  onClick={() => setActiveImage(idx)}
-                >
-                  <img src={img} alt="" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="pd-info">
-          <h1 className="pd-title">
-            {product.brand && <span className="pd-brand-inline">{product.brand} </span>}
-            {product.name}
-          </h1>
-
-          <div className="pd-rating-summary" onClick={scrollToReviews} style={{cursor: 'pointer'}}>
-            <div className="pd-stars">{renderStars(Number(avgRating))}</div>
-            <span className="pd-rating-num">{avgRating}</span>
-            <span className="pd-rating-count">({reviews.length} sharh)</span>
-            {userPhotos.length > 0 && (
-              <span className="pd-photo-count">· {userPhotos.length} fotosurat</span>
-            )}
-          </div>
-
-          {/* Order card - styled like Uzum */}
-          <div className="pd-order-card">
-            <div className="pd-price-row">
-              <span className="pd-current-price">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
-              {numericOldPrice > 0 && <span className="pd-old-price">{formatMoney(numericOldPrice)}</span>}
-            </div>
-
-            {product.sizes && product.sizes.length > 0 && (
-              <div className="pd-sizes-section">
-                <div className="pd-sizes-title">Razmer tanlang:</div>
-                <div className="pd-sizes-list">
-                  {product.sizes.map((sz, idx) => (
-                    <button 
-                      key={idx} 
-                      className={`pd-size-btn ${selectedSize === sz.size ? 'active' : ''} ${sz.stock <= 0 ? 'disabled' : ''}`}
-                      disabled={sz.stock <= 0}
-                      onClick={() => setSelectedSize(sz.size)}
-                    >
-                      {sz.size}
-                    </button>
+      {/* Sticky Top Bar (Only visible when scrolled down) */}
+      <div className={`pd-sticky-bar ${showStickyBar ? 'visible' : ''}`}>
+        <div className="container pd-sticky-container">
+          <div className="pd-sticky-left">
+            <img src={productImages[0]} alt={product.name} />
+            <div className="pd-sticky-info">
+              <h4 title={product.name}>{product.name}</h4>
+              <div className="pd-sticky-rating">
+                <div className="pd-stars">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={12} fill="#f59e0b" color="#f59e0b" />
                   ))}
                 </div>
+                <span>{avgRating} ({reviews.length} sharh) • {product.orders || 9} buyurtma</span>
               </div>
-            )}
-
-            <div className="pd-buy-actions">
-              {(() => {
-                // Determine cart ID based on product ID and selected size (if any)
-                // For simplicity here, we assume product.id represents the base product.
-                // We will create a unique cart item ID if a size is selected: `product.id_size`
-                const cartItemId = selectedSize ? `${product.id}_${selectedSize}` : product.id;
-                const cartItem = getCartItem(cartItemId);
-                
-                // Find stock limit
-                let maxStock = product.stock ? parseInt(product.stock, 10) : 999;
-                if (product.sizes && product.sizes.length > 0 && selectedSize) {
-                  const szObj = product.sizes.find(s => s.size === selectedSize);
-                  maxStock = szObj ? parseInt(szObj.stock, 10) : 0;
-                }
-
-                if (cartItem) {
-                  return (
-                    <div className="pd-cart-qty-controls">
-                      <button 
-                        className="pd-qty-btn"
-                        onClick={() => {
-                          if (cartItem.quantity > 1) {
-                            updateQuantity(cartItemId, -1);
-                          } else {
-                            removeFromCart(cartItemId);
-                          }
-                        }}
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span className="pd-qty-display">{cartItem.quantity}</span>
-                      <button 
-                        className="pd-qty-btn"
-                        disabled={cartItem.quantity >= maxStock}
-                        onClick={() => updateQuantity(cartItemId, 1)}
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                  );
-                }
-
-                const handleAddToCart = () => {
-                  if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-                    alert('Iltimos, avval razmerni tanlang!');
-                    return;
-                  }
-                  
-                  const cartProduct = {
-                    ...product,
-                    id: cartItemId, // unique id for cart
-                    originalId: product.id,
-                    size: selectedSize
-                  };
-                  addToCart(cartProduct);
-                };
-
-                return (
-                  <button className="pd-buy-btn" onClick={handleAddToCart}>
-                    <div className="pd-buy-btn-main">Savatga qo'shish</div>
-                    <div className="pd-buy-btn-sub">Ertaga yetkazib beramiz</div>
-                  </button>
-                );
-              })()}
-              <button
-                className={`pd-fav-btn ${isFavorite(product.id) ? 'active' : ''}`}
-                onClick={() => toggleFavorite(product)}
-              >
-                <Heart
-                  size={22}
-                  fill={isFavorite(product.id) ? '#ef4444' : 'none'}
-                  color={isFavorite(product.id) ? '#ef4444' : '#94a3b8'}
-                />
-              </button>
-            </div>
-
-            {product.sizes && product.sizes.length > 0 ? (
-              selectedSize && (() => {
-                const sz = product.sizes.find(s => s.size === selectedSize);
-                return (
-                  <div className="pd-stock-row">
-                    <span className="pd-stock-icon">✅</span>
-                    <span>{sz ? sz.stock : 0} dona xarid qilish mumkin (Omborda bor)</span>
-                  </div>
-                );
-              })()
-            ) : product.stock ? (
-              <div className="pd-stock-row">
-                <span className="pd-stock-icon">✅</span>
-                <span>{product.stock} dona xarid qilish mumkin</span>
-              </div>
-            ) : null}
-
-            <div className="pd-delivery-row">
-              <span className="pd-delivery-icon">📦</span>
-              <span>Bu haftada ko'p sotib olingan</span>
             </div>
           </div>
+          
+          <div className="pd-sticky-price">
+            <div className="pd-sticky-current">{numericPrice ? formatMoney(numericPrice) : product.price}</div>
+            {numericOldPrice > 0 && <div className="pd-sticky-old">{formatMoney(numericOldPrice)}</div>}
+          </div>
 
-          {/* Description */}
-          {product.description && (
-            <div className="pd-description">
-              <h3>Tavsif</h3>
-              <p>{product.description}</p>
-            </div>
-          )}
-
-          {product.category && (
-            <div className="pd-category-line">
-              Bo'lim: <strong>{product.category}</strong>
-            </div>
-          )}
-
-          {/* Specifications */}
-          <div className="pd-specs">
-            <h3>Xususiyatlari</h3>
-            <ul className="pd-specs-list">
-              <li>
-                <span className="spec-label">Og'irligi:</span>
-                <span className="spec-value">Qadoq bilan 500g</span>
-              </li>
-              <li>
-                <span className="spec-label">Ishlab chiqarilgan:</span>
-                <span className="spec-value">O'zbekiston, Namangan</span>
-              </li>
-              <li>
-                <span className="spec-label">Kafolat:</span>
-                <span className="spec-value">Sifat kafolatlangan</span>
-              </li>
-            </ul>
+          <div className="pd-sticky-action">
+            {cartItem ? (
+              <div className="pd-cart-qty-controls sticky-qty">
+                <button 
+                  className="pd-qty-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (cartItem.quantity > 1) updateQuantity(cartItemId, -1);
+                    else removeFromCart(cartItemId);
+                  }}
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="pd-qty-display">{cartItem.quantity}</span>
+                <button 
+                  className="pd-qty-btn"
+                  onClick={(e) => { e.stopPropagation(); updateQuantity(cartItemId, 1); }}
+                  disabled={cartItem.quantity >= maxStock}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="pd-buy-btn pd-sticky-buy-btn"
+                onClick={handleAddToCart}
+              >
+                <div className="pd-buy-btn-main">Savatga qo'shish</div>
+                <div className="pd-buy-btn-sub">Ertaga yetkazib beramiz</div>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* User photos section */}
-      {userPhotos.length > 0 && (
-        <section className="pd-section">
-          <h2>Xaridorlar fotosuratlar ({userPhotos.length})</h2>
-          <div className="pd-user-photos">
-            {userPhotos.map((photo, idx) => (
-              <div key={idx} className="pd-user-photo">
-                <img src={photo} alt={`Foto ${idx + 1}`} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Back button */}
+      <button className="pd-back" onClick={() => navigate(-1)}>
+        <ChevronLeft size={18} />
+        <span>Orqaga</span>
+      </button>
 
-      {/* Reviews section */}
-      <section className="pd-section" ref={reviewsRef}>
-        <div className="pd-reviews-header">
-          <h2>Sharhlar ({reviews.length})</h2>
-          {reviews.length > 0 && (
-            <div className="pd-avg-block">
-              <span className="pd-avg-num">{avgRating}</span>
-              <div className="pd-avg-stars">{renderStars(Number(avgRating), 20)}</div>
-              <span className="pd-avg-count">{reviews.length} sharh</span>
+      {/* Main layout: 4 columns */}
+      <div className="pd-top">
+        {/* Col 1: Vertical thumbnails */}
+        <div className="pd-thumbs-col">
+          {productImages.map((img, idx) => (
+            <div
+              key={idx}
+              className={`pd-thumb ${idx === activeImage ? 'active' : ''}`}
+              onClick={() => setActiveImage(idx)}
+            >
+              <img src={img} alt="" />
+            </div>
+          ))}
+        </div>
+
+        {/* Col 2: Main image with arrows */}
+        <div className="pd-image-col">
+          <div className="pd-main-image">
+            <img src={productImages[activeImage]} alt={product.name} />
+            {productImages.length > 1 && (
+              <>
+                <button
+                  className="pd-img-arrow left"
+                  onClick={() => setActiveImage(i => (i - 1 + productImages.length) % productImages.length)}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  className="pd-img-arrow right"
+                  onClick={() => setActiveImage(i => (i + 1) % productImages.length)}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+            {product.badge && <span className="pd-badge">{product.badge}</span>}
+          </div>
+        </div>
+
+        {/* Col 3: Title + rating + sizes */}
+        <div className="pd-info-col">
+          <h1 className="pd-title">
+            {product.name}
+          </h1>
+
+          <div className="pd-rating-summary">
+            <div className="pd-stars">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
+              ))}
+            </div>
+            <span className="pd-rating-count">{reviews.length} sharh</span>
+            {reviews.length > 0 && <span className="pd-dot">·</span>}
+            <span className="pd-rating-count">{reviews.length * 3 + 2} buyurtma</span>
+          </div>
+
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="pd-sizes-section">
+              <div className="pd-sizes-title">
+                razmer: <strong>{selectedSize || '—'}</strong>
+              </div>
+              <div className="pd-sizes-list">
+                {product.sizes.map((sz, idx) => (
+                  <button
+                    key={idx}
+                    className={`pd-size-btn ${selectedSize === sz.size ? 'active' : ''} ${sz.stock <= 0 ? 'disabled' : ''}`}
+                    disabled={sz.stock <= 0}
+                    onClick={() => setSelectedSize(sz.size)}
+                  >
+                    {sz.size}
+                  </button>
+                ))}
+              </div>
+              <button className="pd-sizes-link" onClick={() => setActiveTab('sizes')}>O'lchamlar haqida batafsil</button>
             </div>
           )}
         </div>
 
-        {/* Write review */}
-        <form className="pd-review-form" onSubmit={handleSubmitReview}>
-          <h3>Sharh qoldiring</h3>
-          <div className="pd-star-select">
-            <span>Bahoyingiz:</span>
-            <div className="pd-star-row">
-              {[1, 2, 3, 4, 5].map(star => (
-                <Star
-                  key={star}
-                  size={28}
-                  className="pd-star-input"
-                  fill={(hoverRating || reviewRating) >= star ? '#f59e0b' : '#e2e8f0'}
-                  color={(hoverRating || reviewRating) >= star ? '#f59e0b' : '#e2e8f0'}
-                  onClick={() => setReviewRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  style={{ cursor: 'pointer', transition: 'transform 0.15s' }}
-                />
+        {/* Col 4: Price & Purchase card */}
+        <div className="pd-order-card">
+          <div className="pd-price-row">
+            <span className="pd-current-price">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
+          </div>
+          {numericOldPrice > 0 && (
+            <span className="pd-old-price">{formatMoney(numericOldPrice)}</span>
+          )}
+
+          <div className="pd-action-row">
+            <button className="pd-one-click-btn">1 klikda xarid qilish</button>
+            <button
+              className={`pd-fav-btn ${isFavorite(product.id) ? 'active' : ''}`}
+              onClick={() => toggleFavorite(product)}
+            >
+              <Heart size={20} fill={isFavorite(product.id) ? '#ef4444' : 'none'} color={isFavorite(product.id) ? '#ef4444' : '#94a3b8'} />
+            </button>
+          </div>
+
+          {cartItem ? (
+            <div className="pd-cart-qty-controls">
+              <button className="pd-qty-btn" onClick={() => { if (cartItem.quantity > 1) { updateQuantity(cartItemId, -1); } else { removeFromCart(cartItemId); } }}>
+                <Minus size={16} />
+              </button>
+              <span className="pd-qty-display">{cartItem.quantity}</span>
+              <button className="pd-qty-btn" disabled={cartItem.quantity >= maxStock} onClick={() => updateQuantity(cartItemId, 1)}>
+                <Plus size={16} />
+              </button>
+            </div>
+          ) : (
+            <button className="pd-buy-btn" onClick={handleAddToCart}>
+              <div className="pd-buy-btn-main">Savatga qo'shish</div>
+              <div className="pd-buy-btn-sub">Ertaga yetkazib beramiz</div>
+            </button>
+          )}
+
+          {product.sizes && product.sizes.length > 0 ? (
+            selectedSize && (() => {
+              const sz = product.sizes.find(s => s.size === selectedSize);
+              return sz && sz.stock > 0 ? (
+                <div className="pd-stock-row">
+                  <CheckCircle size={16} color="#16a34a" />
+                  <span>Oxirigisi qoldi</span>
+                </div>
+              ) : null;
+            })()
+          ) : product.stock ? (
+            <div className="pd-stock-row">
+              <CheckCircle size={16} color="#16a34a" />
+              <span>Oxirigisi qoldi</span>
+            </div>
+          ) : null}
+
+          <div className="pd-in-carts-row">
+            <ShoppingBag size={16} color="#8b5cf6" />
+            <span>{(numericPrice % 200) + 50} kishining savatida</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Uzum Style Bottom Layout */}
+      <div className="pd-bottom-content">
+        
+        {/* Reviews Horizontal Section */}
+        <div className="uzum-reviews-section">
+          <div className="uzum-reviews-header">
+            <span className="uzum-rating-big">{avgRating}</span>
+            <div className="uzum-stars-row">
+              {renderStars(Number(avgRating), 18)}
+            </div>
+            <span className="uzum-review-count">{reviews.length} sharh</span>
+          </div>
+          
+          <div className="uzum-reviews-grid">
+            <button className="uzum-review-arrow left"><ChevronLeft size={20} /></button>
+            
+            <div className="uzum-review-cards">
+              {reviews.slice(0, 2).map((rev, idx) => (
+                <div key={idx} className="uzum-review-card">
+                  <div className="uzum-rev-top">
+                    <div className="uzum-rev-author">{rev.author}</div>
+                    <div className="uzum-rev-stars">{renderStars(rev.rating, 14)}</div>
+                  </div>
+                  <div className="uzum-rev-date">{rev.date}</div>
+                  {rev.size && <div className="uzum-rev-size">размер: {rev.size}</div>}
+                  {rev.comment && <div className="uzum-rev-comment">{rev.comment}</div>}
+                </div>
+              ))}
+            </div>
+
+            <button className="uzum-review-arrow right"><ChevronRight size={20} /></button>
+          </div>
+
+          <div className={`uzum-all-reviews-container ${showAllReviews ? 'open' : ''}`}>
+            <div className="uzum-reviews-grid-vertical">
+              {reviews.slice(2).map((rev, idx) => (
+                <div key={idx} className="uzum-review-card">
+                  <div className="uzum-rev-top">
+                    <div className="uzum-rev-author">{rev.author}</div>
+                    <div className="uzum-rev-stars">{renderStars(rev.rating, 14)}</div>
+                  </div>
+                  <div className="uzum-rev-date">{rev.date}</div>
+                  {rev.size && <div className="uzum-rev-size">размер: {rev.size}</div>}
+                  {rev.comment && <div className="uzum-rev-comment">{rev.comment}</div>}
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="pd-review-inputs">
-            <input
-              type="text"
-              placeholder="Afzalliklari"
-              value={reviewPros}
-              onChange={(e) => setReviewPros(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Kamchiliklari"
-              value={reviewCons}
-              onChange={(e) => setReviewCons(e.target.value)}
-            />
-            <textarea
-              placeholder="Izoh"
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          {/* Review image upload */}
-          <div className="pd-review-images-row">
-            {reviewImagePreviews.map((src, idx) => (
-              <div key={idx} className="pd-review-img-preview">
-                <img src={src} alt="" />
-                <button type="button" className="pd-review-img-remove" onClick={() => removeReviewImage(idx)}>
-                  <X size={12} />
-                </button>
-              </div>
-            ))}
-            <label className="pd-review-add-img">
-              <Camera size={20} />
-              <span>Rasm</span>
-              <input type="file" accept="image/*" multiple onChange={handleReviewImageUpload} hidden />
-            </label>
-          </div>
-
-          <button type="submit" className="btn full-width-btn" style={{maxWidth: 280}}>
-            <Send size={18} />
-            <span>Yuborish</span>
-          </button>
-        </form>
-
-        {/* Reviews list */}
-        <div className="pd-reviews-list">
-          {reviews.map(review => (
-            <div key={review.id} className="pd-review-card">
-              <div className="pd-review-top">
-                <div className="pd-review-author">
-                  <div className="pd-review-avatar">{review.author.charAt(0).toUpperCase()}</div>
-                  <div>
-                    <strong>{review.author}</strong>
-                    <span className="pd-review-date">{review.date}</span>
-                  </div>
-                </div>
-                <div className="pd-review-stars">{renderStars(review.rating, 14)}</div>
-              </div>
-              <div className="pd-review-content">
-                {review.pros && (
-                  <p className="pd-review-text"><strong>Afzalliklari:</strong> {review.pros}</p>
-                )}
-                {review.cons && (
-                  <p className="pd-review-text"><strong>Kamchiliklari:</strong> {review.cons}</p>
-                )}
-                {review.comment && (
-                  <p className="pd-review-text"><strong>Izoh:</strong> {review.comment}</p>
-                )}
-              </div>
-              {review.images && review.images.length > 0 && (
-                <div className="pd-review-images">
-                  {review.images.map((img, idx) => (
-                    <div key={idx} className="pd-review-photo">
-                      <img src={img} alt="" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+          {reviews.length > 2 && (
+            <button 
+              className="uzum-all-reviews-btn" 
+              onClick={() => setShowAllReviews(!showAllReviews)}
+            >
+              {showAllReviews ? 'Yopish' : "Hamma sharhlarni ko'rish"}
+            </button>
+          )}
         </div>
-      </section>
+
+        {/* Info Tabs Section */}
+        <div className="uzum-tabs-section">
+          <div className="uzum-tabs-header">
+            <button 
+              className={`uzum-tab-btn ${activeTab === 'description' ? 'active' : ''}`}
+              onClick={() => setActiveTab('description')}
+            >
+              Mahsulot tavsifi
+            </button>
+            <button 
+              className={`uzum-tab-btn ${activeTab === 'sizes' ? 'active' : ''}`}
+              onClick={() => setActiveTab('sizes')}
+            >
+              O'lchamlar
+            </button>
+            <button 
+              className={`uzum-tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+              onClick={() => setActiveTab('content')}
+            >
+              Tarkib
+            </button>
+          </div>
+          
+          <div className="uzum-tab-content">
+            {activeTab === 'description' && (
+              <div className="uzum-desc-text">
+                {product.description || "Ushbu mahsulot uchun batafsil tavsif hozircha mavjud emas. Mahsulot haqida to'liq ma'lumot olish uchun sotuvchiga murojaat qilishingiz mumkin."}
+              </div>
+            )}
+            {activeTab === 'sizes' && (
+              <div className="uzum-sizes-text">
+                O'lchamlar standart qoliplarga mos keladi. O'zingiz kiyib yurgan odatiy razmerni tanlashingizni tavsiya qilamiz.
+              </div>
+            )}
+            {activeTab === 'content' && (
+              <div className="uzum-content-text">
+                100% paxta
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Similar Products */}
+        <div className="uzum-similar-section">
+          <h2 className="uzum-similar-title">Shunga o'xshash tovarlar</h2>
+          <div className="uzum-similar-grid">
+            {allProducts
+              .filter(p => p.id !== product.id)
+              .slice(0, 6)
+              .map((prod) => {
+                const productImg = (prod.images && prod.images.length > 0) 
+                  ? prod.images[0] 
+                  : (prod.image || "https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=500&auto=format&fit=crop&q=60");
+
+                const numPrice = parseFloat(String(prod.price).replace(/\D/g, '')) || 0;
+                const numOldPrice = prod.oldPrice ? parseFloat(String(prod.oldPrice).replace(/\D/g, '')) : 0;
+                const fmtMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
+
+                return (
+                  <div key={prod.id} className="card product-card">
+                    <div className="product-image" onClick={() => navigate(`/product/${prod.id}`)} style={{cursor: 'pointer'}}>
+                      <img src={productImg} alt={prod.name} />
+                      <button
+                        className={`favorite-btn ${isFavorite(prod.id) ? 'active' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); toggleFavorite(prod); }}
+                      >
+                        <Heart
+                          size={20}
+                          fill={isFavorite(prod.id) ? '#ef4444' : 'none'}
+                          color={isFavorite(prod.id) ? '#ef4444' : '#6b7280'}
+                        />
+                      </button>
+                      {(prod.badge || prod.category) && (
+                        <span className="category-badge" style={prod.badge ? {background: '#ec4899', color: '#fff'} : {background: 'rgba(255,255,255,0.9)', color: '#0a1052'}}>{prod.badge || prod.category}</span>
+                      )}
+                    </div>
+                    <div className="product-info" onClick={() => navigate(`/product/${prod.id}`)} style={{cursor: 'pointer'}}>
+                      <div className="price-block">
+                        <span className="current-price">{numPrice ? fmtMoney(numPrice) : prod.price}</span>
+                        {numOldPrice > 0 && <span className="old-price">{fmtMoney(numOldPrice)}</span>}
+                      </div>
+                      <h3 className="product-name" title={prod.name}>
+                        {prod.brand && <strong style={{fontWeight: 700}}>{prod.brand} / </strong>}
+                        {prod.name}
+                      </h3>
+                      <div className="rating-row">
+                        <Star size={14} fill="#f59e0b" color="#f59e0b" />
+                        <span>4.8 (574 sharhlar)</span>
+                      </div>
+                      
+                      {(() => {
+                        const cartItem = getCartItem(prod.id);
+                        if (cartItem) {
+                          return (
+                            <div className="cart-qty-controls" onClick={(e) => e.stopPropagation()}>
+                              <button 
+                                className="qty-btn"
+                                onClick={() => {
+                                  if (cartItem.quantity > 1) {
+                                    updateQuantity(prod.id, -1);
+                                  } else {
+                                    removeFromCart(prod.id);
+                                  }
+                                }}
+                              >
+                                <Minus size={16} />
+                              </button>
+                              <span className="qty-display">{cartItem.quantity}</span>
+                              <button 
+                                className="qty-btn"
+                                onClick={() => updateQuantity(prod.id, 1)}
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                          );
+                        }
+                        return (
+                          <button 
+                            className="btn full-width-btn" 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              addToCart(prod); 
+                            }}
+                          >
+                            <ShoppingBag size={18} />
+                            <span>Savatga</span>
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                );
+            })}
+          </div>
+        </div>
+
+      </div>
 
       {/* Mobile Bottom Fixed Bar */}
-      <div 
-        className="pd-mobile-bottom-bar" 
-        onClick={() => navigate('/cart')} 
-        style={{cursor: 'pointer'}}
-      >
+      <div className="pd-mobile-bottom-bar" onClick={() => navigate('/cart')} style={{cursor: 'pointer'}}>
         <div className="pd-mobile-price">
           <span className="pd-mobile-current">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
           {numericOldPrice > 0 && <span className="pd-mobile-old">{formatMoney(numericOldPrice)}</span>}
         </div>
-        <button className="pd-buy-btn" style={{color: '#fff', fontWeight: 'bold'}}>
-          Savatga
-        </button>
+        <button className="pd-buy-btn" style={{color: '#fff', fontWeight: 'bold'}}>Savatga</button>
       </div>
     </div>
   );

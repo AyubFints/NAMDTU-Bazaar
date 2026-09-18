@@ -23,15 +23,17 @@ const Login = () => {
     setPhone(formatted);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (name === 'Admin' && phone === '91 000 00 00' && password === 'Admin001') {
-      login({ name: 'Admin', role: 'admin', phone });
-      navigate('/admin');
-    } else {
-      // Mock successful login for normal user until backend is ready
-      login({ name: name || 'Foydalanuvchi', role: 'user', phone });
+    const result = await login(phone, password);
+    if (result.success) {
+      // the role is updated in the context, but we can't await context state update immediately
+      // so we use a small timeout or wait for the user state, but actually navigate('/') works
+      // for both if we handle admin redirect in App.js or Home.js. Let's just navigate to '/'
+      // and let the Navbar handle UI. But if we need to force admin panel:
       navigate('/');
+    } else {
+      alert(result.message);
     }
   };
 

@@ -3,49 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ChevronDown, ChevronLeft, ChevronRight, Heart, ShoppingBag, Star, Minus, Plus } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCart } from '../context/CartContext';
+import api from '../api/axios';
 import './Home.css';
 
-const MOCK_PRODUCTS = [
-  {
-    id: 1,
-    name: "Qo'lda to'qilgan qishki sharf",
-    price: "45,000 UZS",
-    image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500&auto=format&fit=crop&q=60",
-    author: "Malika (Dizayn fakulteti)",
-    category: "Kiyim"
-  },
-  {
-    id: 2,
-    name: "Yog'ochdan ishlangan qalamdon",
-    price: "25,000 UZS",
-    image: "https://images.unsplash.com/photo-1590725140246-2003eaeb705e?w=500&auto=format&fit=crop&q=60",
-    author: "Sardor (Texnologiya fakulteti)",
-    category: "Hunar"
-  },
-  {
-    id: 3,
-    name: "Eko-sumka (Shopper)",
-    price: "30,000 UZS",
-    image: "https://images.unsplash.com/photo-1597484661643-2f5fef640eb1?w=500&auto=format&fit=crop&q=60",
-    author: "Zuhra (Ekologiya fakulteti)",
-    category: "Aksessuar"
-  },
-  {
-    id: 4,
-    name: "Milliylashtirilgan zamonaviy ko'ylak",
-    price: "120,000 UZS",
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&auto=format&fit=crop&q=60",
-    author: "Kamola (Dizayn fakulteti)",
-    category: "Kiyim"
-  }
-];
 
 const CATEGORIES_LIST = [
-  { id: 'arzon', label: 'Arzon narxlar kafolati', icon: <ShieldCheck size={18} className="tag-icon" /> },
-  { id: 'trend', label: 'Trendli kiyimlar', icon: null },
-  { id: 'onalar', label: 'Onalar va bolalar', icon: null },
-  { id: 'qol-ishlari', label: "Qo'l ishlari", icon: null }
+  { id: 'all', label: 'Barchasi', icon: <ShieldCheck size={18} className="tag-icon" /> },
+  { id: 'Trendli kiyimlar', label: 'Trendli kiyimlar', icon: null },
+  { id: 'Onalar va bolalar', label: 'Onalar va bolalar', icon: null },
+  { id: "Qo'l ishlari", label: "Qo'l ishlari", icon: null }
 ];
+
+const SUBCATEGORIES_MAP = {
+  'Trendli kiyimlar': [
+    { id: 'k-1', label: 'Ayollar', image: 'https://images.unsplash.com/photo-1555529733-0e670560f4e1?w=150&h=150&fit=crop' },
+    { id: 'k-2', label: 'Erkaklar', image: 'https://images.unsplash.com/photo-1434389678232-0690916053cb?w=150&h=150&fit=crop' },
+    { id: 'k-3', label: 'Qishki', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=150&h=150&fit=crop' }
+  ],
+  'Onalar va bolalar': [
+    { id: 'o-1', label: 'Chaqaloqlar', image: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=150&h=150&fit=crop' },
+    { id: 'o-2', label: "O'yinchoqlar", image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=150&h=150&fit=crop' }
+  ],
+  "Qo'l ishlari": [
+    { id: 'q-1', label: "Sovg'alar", image: 'https://images.unsplash.com/photo-1493106819501-66d381c466f1?w=150&h=150&fit=crop' },
+    { id: 'q-2', label: "San'at", image: 'https://images.unsplash.com/photo-1521742461971-ceb970621fb7?w=150&h=150&fit=crop' }
+  ]
+};
 
 const HERO_SLIDES = [
   {
@@ -69,32 +52,37 @@ const HERO_SLIDES = [
 ];
 
 const Home = () => {
-  const [activeCategory, setActiveCategory] = useState('arzon');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [showMoreCats, setShowMoreCats] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [allProducts, setAllProducts] = useState(MOCK_PRODUCTS);
+  const [allProducts, setAllProducts] = useState([]);
   const [banners, setBanners] = useState(HERO_SLIDES);
   
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
   const navigate = useNavigate();
 
-  // Load admin products and banners from localStorage
+  // Load admin products and banners from backend
   useEffect(() => {
-    const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-      const adminProducts = JSON.parse(savedProducts);
-      const approvedProducts = adminProducts.filter(p => p.status !== 'pending');
-      setAllProducts([...approvedProducts, ...MOCK_PRODUCTS]);
-    }
-    
-    const savedBanners = localStorage.getItem('hero_banners');
-    if (savedBanners) {
-      const parsedBanners = JSON.parse(savedBanners);
-      if (parsedBanners.length > 0) {
-        setBanners(parsedBanners);
+    const fetchHomeData = async () => {
+      try {
+        const { data: productsData } = await api.get('/products');
+        setAllProducts(productsData);
+      } catch (error) {
+        console.error("Failed to load products", error);
+        setAllProducts([]);
       }
-    }
+      
+      try {
+        const { data: bannersData } = await api.get('/banners');
+        if (bannersData && bannersData.length > 0) {
+          setBanners(bannersData);
+        }
+      } catch (error) {
+        console.error("Failed to load banners", error);
+      }
+    };
+    fetchHomeData();
   }, []);
 
   // Auto-advance slider
@@ -161,49 +149,69 @@ const Home = () => {
         ))}
       </div>
 
-      <section className="hero-slider-section">
-        <div className="slider-container">
-          <button className="slider-arrow left" onClick={prevSlide}>
-            <ChevronLeft size={28} />
-          </button>
-          
-          <div className="slider-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-            {banners.map(slide => (
-              <div className="slide" key={slide.id}>
-                <img src={slide.image} alt={slide.title} />
+      {activeCategory !== 'all' && SUBCATEGORIES_MAP[activeCategory] && (
+        <div className="visual-categories-bar">
+          {SUBCATEGORIES_MAP[activeCategory].map(sub => (
+            <div 
+              key={sub.id} 
+              className="visual-category-item"
+            >
+              <div className="visual-category-img-wrap">
+                <img src={sub.image} alt={sub.label} />
               </div>
-            ))}
-          </div>
-
-          <button className="slider-arrow right" onClick={nextSlide}>
-            <ChevronRight size={28} />
-          </button>
-
-          <div className="slider-dots">
-            {banners.map((_, idx) => (
-              <span 
-                key={idx} 
-                className={`dot ${idx === currentSlide ? 'active' : ''}`} 
-                onClick={() => setCurrentSlide(idx)}
-              ></span>
-            ))}
-          </div>
+              <span>{sub.label}</span>
+            </div>
+          ))}
         </div>
-      </section>
+      )}
+
+      {activeCategory === 'all' && (
+        <section className="hero-slider-section">
+          <div className="slider-container">
+            <button className="slider-arrow left" onClick={prevSlide}>
+              <ChevronLeft size={28} />
+            </button>
+            
+            <div className="slider-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+              {banners.map(slide => (
+                <div className="slide" key={slide.id}>
+                  <img src={slide.image} alt={slide.title} />
+                </div>
+              ))}
+            </div>
+
+            <button className="slider-arrow right" onClick={nextSlide}>
+              <ChevronRight size={28} />
+            </button>
+
+            <div className="slider-dots">
+              {banners.map((_, idx) => (
+                <span 
+                  key={idx} 
+                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
+                  onClick={() => setCurrentSlide(idx)}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="products-section">
-        <div className="section-header">
-          <h2>Yangi Mahsulotlar</h2>
-          <div className="filters">
-            <button className="filter-btn active">Barchasi</button>
-            <button className="filter-btn">Kiyimlar</button>
-            <button className="filter-btn">Hunarmandchilik</button>
-            <button className="filter-btn">San'at</button>
+        {activeCategory !== 'all' && (
+          <div className="section-header" style={{marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <h2>{activeCategory}</h2>
+            <button 
+              onClick={() => setActiveCategory('all')} 
+              style={{background: 'none', border: 'none', color: '#7c3aed', fontWeight: 600, cursor: 'pointer'}}
+            >
+              Asosiy sahifaga qaytish
+            </button>
           </div>
-        </div>
+        )}
 
         <div className="products-grid">
-          {allProducts.map(product => {
+          {allProducts.filter(p => activeCategory === 'all' || p.category === activeCategory).map(product => {
             // Determine the image to show (handle new multiple images array or old single image)
             const productImg = (product.images && product.images.length > 0) 
               ? product.images[0] 
@@ -292,6 +300,18 @@ const Home = () => {
             );
           })}
         </div>
+
+        {activeCategory !== 'all' && (
+          <div style={{display: 'flex', justifyContent: 'center', marginTop: '40px'}}>
+            <button 
+              className="profile-save-btn" 
+              onClick={() => setActiveCategory('all')}
+              style={{padding: '12px 24px', fontSize: '16px', maxWidth: '300px'}}
+            >
+              Boshqa tovarlarni ko'rish
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

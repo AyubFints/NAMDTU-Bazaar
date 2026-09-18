@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle } from 'lucide-react';
 import './Cart.css';
 
@@ -46,30 +47,34 @@ const Cart = () => {
     );
   }
 
-  const handleCheckoutSubmit = (e) => {
+  const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     if (!phone.trim()) return;
 
-    // Save order
-    const savedOrders = localStorage.getItem('orders');
-    const existingOrders = savedOrders ? JSON.parse(savedOrders) : [];
-    
-    const newOrder = {
-      id: Date.now(),
-      phone: phone,
-      buyer: user ? { name: user.name, phone: user.phone } : { name: 'Mehmon', phone },
-      items: selectedItems,
-      total: grandTotal,
-      status: 'Yangi',
-      date: new Date().toISOString()
-    };
-    
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+    try {
+      await api.post('/orders', {
+        buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
+        items: selectedItems.map(item => ({
+          originalId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          size: item.size || null,
+          image: (item.images && item.images.length > 0) ? item.images[0] : item.image
+        })),
+        totalAmount: grandTotal,
+        address: 'Kiritilmagan',
+        comment: ''
+      });
 
-    // Clear cart and show success
-    setShowPhoneModal(false);
-    setShowSuccessModal(true);
-    removeSelected(); // Remove purchased items from cart
+      // Clear cart and show success
+      setShowPhoneModal(false);
+      setShowSuccessModal(true);
+      removeSelected(); // Remove purchased items from cart
+    } catch (error) {
+      console.error(error);
+      alert("Buyurtmani yuborishda xatolik yuz berdi: " + (error.response?.data?.message || error.message));
+    }
   };
 
   return (

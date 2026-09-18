@@ -145,8 +145,10 @@
 
 .slider-container {
   position: relative;
-  width: 100%;
-  height: 480px;
+  width: 1920px;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 300px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
@@ -206,7 +208,7 @@
 
 .slider-dots {
   position: absolute;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -215,10 +217,10 @@
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.5);
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -226,7 +228,7 @@
 .dot.active {
   background: #ffffff;
   width: 24px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 @media (max-width: 768px) {
@@ -508,6 +510,62 @@
   }
 
   .product-info {
-    padding: 8px 8px 12px; /* Less padding to keep it compact */
+    padding: 8px 8px 12px;
   }
+}
+
+.visual-categories-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: none;
+}
+.visual-categories-bar::-webkit-scrollbar {
+  display: none;
+}
+.visual-category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-width: 80px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+.visual-category-item:hover {
+  transform: translateY(-2px);
+}
+.visual-category-img-wrap {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.visual-category-item.active .visual-category-img-wrap {
+  border-color: #f97316; /* Orange color */
+}
+.visual-category-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.visual-category-item span {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.visual-category-item.active span {
+  font-weight: 700;
+  color: #0f172a;
 }
