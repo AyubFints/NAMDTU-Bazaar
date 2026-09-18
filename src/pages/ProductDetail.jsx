@@ -572,7 +572,7 @@ const ProductDetail = () => {
             </button>
           </div>
         ) : (
-          <button className="pd-buy-btn" onClick={handleAddToCart} style={{color: '#fff', fontWeight: 'bold'}}>
+          <button className="pd-mobile-buy-btn" onClick={handleAddToCart} style={{color: '#fff', fontWeight: 'bold'}}>
             Savatga qo'shish
           </button>
         )}

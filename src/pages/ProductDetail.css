@@ -697,6 +697,18 @@
 
   .pd-buy-btn, .pd-action-row, .pd-one-click-btn { display: none; }
 
+  .pd-mobile-buy-btn {
+    background: linear-gradient(135deg, #1e3a8a, #4c1d95);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
   .pd-mobile-bottom-bar {
     display: flex;
     position: fixed;
