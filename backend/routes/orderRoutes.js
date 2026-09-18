@@ -3,6 +3,8 @@ const router = express.Router();
 const {
   createOrder,
   getOrders,
+  getMyOrders,
+  cancelOrder,
   updateOrderStatus,
   deleteOrder
 } = require('../controllers/orderController');
@@ -12,6 +14,11 @@ router.route('/')
   .post(createOrder) // Guest can create order
   .get(protect, admin, getOrders); // Only admin can get all orders
 
+router.route('/my')
+  .post(getMyOrders);
+
+router.route('/:id/cancel')
+  .post(cancelOrder);
 router.route('/:id/status')
   .put(protect, admin, updateOrderStatus);
 

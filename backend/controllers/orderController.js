@@ -20,6 +20,41 @@ exports.createOrder = async (req, res) => {
   }
 };
 
+exports.getMyOrders = async (req, res) => {
+  try {
+    const { orderIds } = req.body;
+    if (!orderIds || !Array.isArray(orderIds)) {
+      return res.status(400).json({ message: "No orderIds provided" });
+    }
+    const orders = await Order.findAll({
+      where: {
+        id: orderIds
+      },
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (order) {
+      if (order.status !== 'Bekor qilingan') {
+        order.status = 'Bekor qilingan';
+        await order.save();
+      }
+      res.json(order);
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({

@@ -52,7 +52,7 @@ const Cart = () => {
     if (!phone.trim()) return;
 
     try {
-      await api.post('/orders', {
+      const response = await api.post('/orders', {
         buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
         items: selectedItems.map(item => ({
           originalId: item.id,
@@ -66,6 +66,13 @@ const Cart = () => {
         address: 'Kiritilmagan',
         comment: ''
       });
+
+      // Save order id for "My Orders" feature
+      if (response.data && response.data.id) {
+        const savedIds = JSON.parse(localStorage.getItem('my_order_ids') || '[]');
+        savedIds.push(response.data.id);
+        localStorage.setItem('my_order_ids', JSON.stringify(savedIds));
+      }
 
       // Clear cart and show success
       setShowPhoneModal(false);
