@@ -316,7 +316,6 @@ const Home = () => {
               </div>
             );
           })}
-          )}
         </div>
 
         {activeCategory !== 'all' && (
