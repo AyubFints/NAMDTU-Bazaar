@@ -9,8 +9,8 @@ const {
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.route('/')
-  .post(protect, createOrder)
-  .get(protect, getOrders); // Getting all orders requires user to be logged in (can be filtered on frontend, or we can filter in backend later)
+  .post(createOrder) // Guest can create order
+  .get(protect, admin, getOrders); // Only admin can get all orders
 
 router.route('/:id/status')
   .put(protect, admin, updateOrderStatus);
