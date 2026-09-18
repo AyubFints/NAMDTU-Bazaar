@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Dinamik manzil: kompyuterda localhost bo'ladi, telefonda IP orqali ochganda IP manzilini oladi
-  baseURL: `http://${window.location.hostname}:5000/api`, 
+  // Render.com'dagi haqiqiy backend manzili (kompyuter o'chiq bo'lsa ham ishlaydi)
+  baseURL: 'https://namdtu-bazaar.onrender.com/api',
   headers: {
     'Content-Type': 'application/json'
   }
