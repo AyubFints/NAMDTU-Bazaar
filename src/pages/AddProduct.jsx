@@ -98,7 +98,7 @@ const AddProduct = () => {
           <div className="form-group">
             <label className="form-label">Rasm yuklash</label>
             <div className="upload-area" style={{ position: 'relative' }}>
-              <input type="file" accept="image/*" onChange={handleImageChange} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
+              <input type="file" accept="image/*" onChange={handleImageChange} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }} />
               {formData.image ? (
                 <img src={formData.image} alt="Preview" style={{ height: '100px', objectFit: 'contain' }} />
               ) : (
