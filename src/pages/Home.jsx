@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ChevronDown, ChevronLeft, ChevronRight, Heart, ShoppingBag, Star, Minus, Plus } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
