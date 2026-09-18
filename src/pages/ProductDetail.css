@@ -714,4 +714,31 @@
   .pd-mobile-price { display: flex; flex-direction: column; }
   .pd-mobile-current { font-size: 18px; font-weight: 800; color: #111827; }
   .pd-mobile-old { font-size: 13px; color: #9ca3af; text-decoration: line-through; }
+
+  /* Mobile bottom bar - qty controls */
+  .pd-mobile-bottom-bar .pd-cart-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 6px 14px;
+  }
+  .pd-mobile-bottom-bar .pd-qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .pd-mobile-bottom-bar .pd-qty-display {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+  }
 }

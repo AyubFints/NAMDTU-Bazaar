@@ -556,12 +556,26 @@ const ProductDetail = () => {
       </div>
 
       {/* Mobile Bottom Fixed Bar */}
-      <div className="pd-mobile-bottom-bar" onClick={() => navigate('/cart')} style={{cursor: 'pointer'}}>
+      <div className="pd-mobile-bottom-bar">
         <div className="pd-mobile-price">
           <span className="pd-mobile-current">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
           {numericOldPrice > 0 && <span className="pd-mobile-old">{formatMoney(numericOldPrice)}</span>}
         </div>
-        <button className="pd-buy-btn" style={{color: '#fff', fontWeight: 'bold'}}>Savatga</button>
+        {cartItem ? (
+          <div className="pd-cart-qty-controls" onClick={e => e.stopPropagation()}>
+            <button className="pd-qty-btn" onClick={() => { if (cartItem.quantity > 1) { updateQuantity(cartItemId, -1); } else { removeFromCart(cartItemId); } }}>
+              <Minus size={16} />
+            </button>
+            <span className="pd-qty-display">{cartItem.quantity}</span>
+            <button className="pd-qty-btn" onClick={() => updateQuantity(cartItemId, 1)}>
+              <Plus size={16} />
+            </button>
+          </div>
+        ) : (
+          <button className="pd-buy-btn" onClick={handleAddToCart} style={{color: '#fff', fontWeight: 'bold'}}>
+            Savatga qo'shish
+          </button>
+        )}
       </div>
     </div>
   );
