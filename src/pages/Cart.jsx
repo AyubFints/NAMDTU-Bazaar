@@ -230,8 +230,8 @@ const Cart = () => {
 
       {/* Checkout Phone Modal */}
       {showPhoneModal && (
-        <div className="cart-modal-overlay">
-          <div className="cart-modal">
+        <div className="cart-modal-overlay" onClick={() => setShowPhoneModal(false)}>
+          <div className="cart-modal" onClick={(e) => e.stopPropagation()}>
             <button className="cart-modal-close" onClick={() => setShowPhoneModal(false)}>
               <X size={20} />
             </button>
@@ -253,8 +253,8 @@ const Cart = () => {
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="cart-modal-overlay">
-          <div className="cart-success-modal">
+        <div className="cart-modal-overlay" onClick={() => setShowSuccessModal(false)}>
+          <div className="cart-success-modal" onClick={(e) => e.stopPropagation()}>
             <button className="cart-modal-close" onClick={() => setShowSuccessModal(false)}>
               <X size={20} />
             </button>

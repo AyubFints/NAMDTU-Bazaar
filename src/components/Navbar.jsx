@@ -32,9 +32,25 @@ const Navbar = () => {
       if (langRef.current && !langRef.current.contains(e.target)) {
         setLangOpen(false);
       }
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+        setMobileLangOpen(false);
+      }
     };
+    
+    const handleScroll = () => {
+      setLangOpen(false);
+      setMenuOpen(false);
+      setMobileLangOpen(false);
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleLangChange = (code) => {

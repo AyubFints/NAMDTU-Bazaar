@@ -58,6 +58,7 @@ const Home = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [banners, setBanners] = useState(HERO_SLIDES);
   const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef(null);
   
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
@@ -65,6 +66,16 @@ const Home = () => {
 
   // Load admin products and banners from backend
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowMoreCats(false);
+      }
+    };
+    const handleScroll = () => setShowMoreCats(false);
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
     const fetchHomeData = async () => {
       setLoading(true);
       try {
@@ -87,6 +98,11 @@ const Home = () => {
       }
     };
     fetchHomeData();
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   // Auto-advance slider
@@ -118,7 +134,7 @@ const Home = () => {
         </button>
         
         {/* Mobile: Dropdown for the rest */}
-        <div className="more-dropdown-wrapper">
+        <div className="more-dropdown-wrapper" ref={dropdownRef}>
           <button 
             className="category-tag more-btn"
             onClick={() => setShowMoreCats(!showMoreCats)}
