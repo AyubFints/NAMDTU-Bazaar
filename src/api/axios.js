@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Backend manzili
+  // Dinamik manzil: kompyuterda localhost bo'ladi, telefonda IP orqali ochganda IP manzilini oladi
+  baseURL: `http://${window.location.hostname}:5000/api`, 
   headers: {
     'Content-Type': 'application/json'
   }
