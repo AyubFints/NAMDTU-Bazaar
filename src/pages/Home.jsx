@@ -57,6 +57,7 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
   const [banners, setBanners] = useState(HERO_SLIDES);
+  const [loading, setLoading] = useState(true);
   
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
@@ -65,12 +66,15 @@ const Home = () => {
   // Load admin products and banners from backend
   useEffect(() => {
     const fetchHomeData = async () => {
+      setLoading(true);
       try {
         const { data: productsData } = await api.get('/products');
         setAllProducts(productsData);
       } catch (error) {
         console.error("Failed to load products", error);
         setAllProducts([]);
+      } finally {
+        setLoading(false);
       }
       
       try {
@@ -211,7 +215,20 @@ const Home = () => {
         )}
 
         <div className="products-grid">
-          {allProducts.filter(p => activeCategory === 'all' || p.category === activeCategory).map(product => {
+          {loading ? (
+            // Skeleton loading cards
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="card product-card skeleton-card">
+                <div className="skeleton skeleton-img"></div>
+                <div className="product-info">
+                  <div className="skeleton skeleton-price"></div>
+                  <div className="skeleton skeleton-title"></div>
+                  <div className="skeleton skeleton-title" style={{width:'60%'}}></div>
+                  <div className="skeleton skeleton-btn"></div>
+                </div>
+              </div>
+            ))
+          ) : allProducts.filter(p => activeCategory === 'all' || p.category === activeCategory).map(product => {
             // Determine the image to show (handle new multiple images array or old single image)
             const productImg = (product.images && product.images.length > 0) 
               ? product.images[0] 
@@ -299,6 +316,7 @@ const Home = () => {
               </div>
             );
           })}
+          )}
         </div>
 
         {activeCategory !== 'all' && (
