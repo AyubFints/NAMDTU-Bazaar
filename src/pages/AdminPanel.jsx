@@ -47,6 +47,8 @@ const AdminPanel = () => {
   const [productBrand, setProductBrand] = useState('');
   const [productStock, setProductStock] = useState('');
   const [productSizes, setProductSizes] = useState([]); // [{size: 'M', stock: 10}]
+  const [productCardNumber, setProductCardNumber] = useState('');
+  const [productCardHolderName, setProductCardHolderName] = useState('');
   const [editingProductId, setEditingProductId] = useState(null);
 
   // Products list
@@ -171,6 +173,8 @@ const AdminPanel = () => {
           brand: productBrand,
           stock: productStock,
           sizes: productSizes,
+          cardNumber: productCardNumber,
+          cardHolderName: productCardHolderName
         });
         
         setProducts(products.map(p => p.id === editingProductId ? data : p));
@@ -188,6 +192,8 @@ const AdminPanel = () => {
           brand: productBrand,
           stock: productStock,
           sizes: productSizes,
+          cardNumber: productCardNumber,
+          cardHolderName: productCardHolderName
         });
         setProducts([data, ...products]);
         showSuccess('Mahsulot muvaffaqiyatli qo\'shildi!');
@@ -204,6 +210,8 @@ const AdminPanel = () => {
       setProductBrand('');
       setProductStock('');
       setProductSizes([]);
+      setProductCardNumber('');
+      setProductCardHolderName('');
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
     }
@@ -221,6 +229,8 @@ const AdminPanel = () => {
     setProductBrand(product.brand || '');
     setProductStock(product.stock || '');
     setProductSizes(product.sizes || []);
+    setProductCardNumber(product.cardNumber || '');
+    setProductCardHolderName(product.cardHolderName || '');
     setActiveTab('products');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -600,6 +610,26 @@ const AdminPanel = () => {
                     />
                   </div>
 
+                  <div className="admin-field">
+                    <label>Karta raqami</label>
+                    <input
+                      type="text"
+                      placeholder="Masalan: 8600 1234 5678 9012"
+                      value={productCardNumber}
+                      onChange={(e) => setProductCardNumber(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="admin-field">
+                    <label>Karta egasi nomi</label>
+                    <input
+                      type="text"
+                      placeholder="Masalan: Palonchiyev Pistonchi"
+                      value={productCardHolderName}
+                      onChange={(e) => setProductCardHolderName(e.target.value)}
+                    />
+                  </div>
+
                   {productSizes.length > 0 ? (
                     <div className="admin-field">
                       <label>Razmerlar bo'yicha zaxira</label>
@@ -718,6 +748,8 @@ const AdminPanel = () => {
                     setProductBadge('');
                     setProductBrand('');
                     setProductStock('');
+                    setProductCardNumber('');
+                    setProductCardHolderName('');
                   }}
                 >
                   <X size={20} />
