@@ -14,8 +14,10 @@ const AddProduct = () => {
     category: '',
     description: '',
     image: null,
+    stock: '',
     cardNumber: '',
-    cardHolderName: ''
+    cardHolderName: '',
+    cardType: ''
   });
 
   const handleChange = (e) => {
@@ -48,7 +50,8 @@ const AddProduct = () => {
         images: formData.image ? [formData.image] : [],
         stock: '10', // Default stock for now
         cardNumber: formData.cardNumber,
-        cardHolderName: formData.cardHolderName
+        cardHolderName: formData.cardHolderName,
+        cardType: formData.cardType
       });
       if (user.role === 'admin') {
         alert("Mahsulot muvaffaqiyatli qo'shildi va darhol sotuvga chiqdi!");
@@ -99,14 +102,22 @@ const AddProduct = () => {
             <textarea name="description" className="form-control" rows="4" placeholder="Mahsulotingiz haqida batafsil ma'lumot bering..." value={formData.description} onChange={handleChange}></textarea>
           </div>
 
-          <div className="form-row">
-            <div className="form-group flex-1">
-              <label className="form-label">Karta raqami</label>
-              <input type="text" name="cardNumber" className="form-control" placeholder="16 talik raqam" value={formData.cardNumber} onChange={handleChange} required />
+          <div className="form-group" style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h4 style={{ margin: 0, fontSize: '15px', color: '#1a1a2e' }}>Karta</h4>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', color: '#64748b' }}>Karta raqam kiriting</label>
+              <input type="text" name="cardNumber" className="form-control" placeholder="Masalan: 8600 1234 5678 9012" value={formData.cardNumber} onChange={handleChange} required />
             </div>
-            <div className="form-group flex-1">
-              <label className="form-label">Karta egasi</label>
-              <input type="text" name="cardHolderName" className="form-control" placeholder="Ism Familiya" value={formData.cardHolderName} onChange={handleChange} required />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', color: '#64748b' }}>Kartaraqam egasi</label>
+              <input type="text" name="cardHolderName" className="form-control" placeholder="Masalan: Palonchiyev Pistonchi" value={formData.cardHolderName} onChange={handleChange} required />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '13px', color: '#64748b' }}>Kartani turi</label>
+              <input type="text" name="cardType" className="form-control" placeholder="Masalan: HUMO, UZCARD..." value={formData.cardType} onChange={handleChange} style={{ width: '50%' }} />
             </div>
           </div>
           

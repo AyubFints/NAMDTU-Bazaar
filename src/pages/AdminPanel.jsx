@@ -49,6 +49,7 @@ const AdminPanel = () => {
   const [productSizes, setProductSizes] = useState([]); // [{size: 'M', stock: 10}]
   const [productCardNumber, setProductCardNumber] = useState('');
   const [productCardHolderName, setProductCardHolderName] = useState('');
+  const [productCardType, setProductCardType] = useState('');
   const [editingProductId, setEditingProductId] = useState(null);
 
   // Products list
@@ -174,7 +175,8 @@ const AdminPanel = () => {
           stock: productStock,
           sizes: productSizes,
           cardNumber: productCardNumber,
-          cardHolderName: productCardHolderName
+          cardHolderName: productCardHolderName,
+          cardType: productCardType
         });
         
         setProducts(products.map(p => p.id === editingProductId ? data : p));
@@ -193,7 +195,8 @@ const AdminPanel = () => {
           stock: productStock,
           sizes: productSizes,
           cardNumber: productCardNumber,
-          cardHolderName: productCardHolderName
+          cardHolderName: productCardHolderName,
+          cardType: productCardType
         });
         setProducts([data, ...products]);
         showSuccess('Mahsulot muvaffaqiyatli qo\'shildi!');
@@ -212,6 +215,7 @@ const AdminPanel = () => {
       setProductSizes([]);
       setProductCardNumber('');
       setProductCardHolderName('');
+      setProductCardType('');
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
     }
@@ -231,6 +235,7 @@ const AdminPanel = () => {
     setProductSizes(product.sizes || []);
     setProductCardNumber(product.cardNumber || '');
     setProductCardHolderName(product.cardHolderName || '');
+    setProductCardType(product.cardType || '');
     setActiveTab('products');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -610,24 +615,41 @@ const AdminPanel = () => {
                     />
                   </div>
 
-                  <div className="admin-field">
-                    <label>Karta raqami</label>
-                    <input
-                      type="text"
-                      placeholder="Masalan: 8600 1234 5678 9012"
-                      value={productCardNumber}
-                      onChange={(e) => setProductCardNumber(e.target.value)}
-                    />
-                  </div>
+                  <div className="admin-field card-group" style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <h4 style={{ margin: 0, fontSize: '15px', color: '#1a1a2e' }}>Karta</h4>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '13px', color: '#64748b' }}>Karta raqam kiriting</label>
+                      <input
+                        type="text"
+                        placeholder="Masalan: 8600 1234 5678 9012"
+                        value={productCardNumber}
+                        onChange={(e) => setProductCardNumber(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      />
+                    </div>
 
-                  <div className="admin-field">
-                    <label>Karta egasi nomi</label>
-                    <input
-                      type="text"
-                      placeholder="Masalan: Palonchiyev Pistonchi"
-                      value={productCardHolderName}
-                      onChange={(e) => setProductCardHolderName(e.target.value)}
-                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '13px', color: '#64748b' }}>Karta raqam egasi</label>
+                      <input
+                        type="text"
+                        placeholder="Masalan: Palonchiyev Pistonchi"
+                        value={productCardHolderName}
+                        onChange={(e) => setProductCardHolderName(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '13px', color: '#64748b' }}>Kartaning turi</label>
+                      <input
+                        type="text"
+                        placeholder="Masalan: HUMO, UZCARD..."
+                        value={productCardType}
+                        onChange={(e) => setProductCardType(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', width: '50%' }}
+                      />
+                    </div>
                   </div>
 
                   {productSizes.length > 0 ? (
@@ -750,6 +772,7 @@ const AdminPanel = () => {
                     setProductStock('');
                     setProductCardNumber('');
                     setProductCardHolderName('');
+                    setProductCardType('');
                   }}
                 >
                   <X size={20} />

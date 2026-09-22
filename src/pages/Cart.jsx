@@ -115,7 +115,8 @@ const Cart = () => {
           size: item.size || null,
           image: (item.images && item.images.length > 0) ? item.images[0] : item.image,
           cardNumber: item.cardNumber,
-          cardHolderName: item.cardHolderName
+          cardHolderName: item.cardHolderName,
+          cardType: item.cardType
         })),
         totalAmount: grandTotal,
         paymentMethod: method,
@@ -334,6 +335,7 @@ const Cart = () => {
                     <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '14px' }}>{item.name}</div>
                     <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px' }}>
                       Karta egasi: {item.cardHolderName || "Kiritilmagan"}
+                      {item.cardType && <span style={{ marginLeft: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#334155', fontWeight: 'bold' }}>{item.cardType}</span>}
                     </div>
                     <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '1px', userSelect: 'all' }}>
                       {item.cardNumber || "Karta kiritilmagan"}

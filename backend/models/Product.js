@@ -54,6 +54,9 @@ const Product = sequelize.define('Product', {
   cardHolderName: {
     type: DataTypes.STRING
   },
+  cardType: {
+    type: DataTypes.STRING
+  },
   status: {
     type: DataTypes.ENUM('pending', 'approved', 'rejected'),
     defaultValue: 'pending'

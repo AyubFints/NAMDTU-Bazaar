@@ -20,7 +20,7 @@ exports.getAdminProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes, cardNumber, cardHolderName } = req.body;
+    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes, cardNumber, cardHolderName, cardType } = req.body;
     
     const product = await Product.create({
       name,
@@ -35,6 +35,7 @@ exports.createProduct = async (req, res) => {
       sizes: sizes || [],
       cardNumber,
       cardHolderName,
+      cardType,
       creatorPhone: req.user.phone,
       creatorName: req.user.name,
       status: req.user.role === 'admin' ? 'approved' : 'pending'
@@ -48,7 +49,7 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes } = req.body;
+    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes, cardNumber, cardHolderName, cardType } = req.body;
     const product = await Product.findByPk(req.params.id);
 
     if (product) {
@@ -62,6 +63,9 @@ exports.updateProduct = async (req, res) => {
       product.badge = badge || product.badge;
       product.brand = brand || product.brand;
       product.sizes = sizes || product.sizes;
+      product.cardNumber = cardNumber || product.cardNumber;
+      product.cardHolderName = cardHolderName || product.cardHolderName;
+      product.cardType = cardType || product.cardType;
 
       await product.save();
       res.json(product);
