@@ -20,7 +20,7 @@ exports.getAdminProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes } = req.body;
+    const { name, price, oldPrice, category, images, description, stock, badge, brand, sizes, cardNumber, cardHolderName } = req.body;
     
     const product = await Product.create({
       name,
@@ -33,6 +33,8 @@ exports.createProduct = async (req, res) => {
       badge,
       brand,
       sizes: sizes || [],
+      cardNumber,
+      cardHolderName,
       creatorPhone: req.user.phone,
       creatorName: req.user.name,
       status: req.user.role === 'admin' ? 'approved' : 'pending'

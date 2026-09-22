@@ -143,6 +143,10 @@ const Orders = () => {
                      selectedOrder.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Yetkazildi'}
                   </strong>
                 </div>
+                <div className="orders-modal-row">
+                  <span>To'lov turi:</span>
+                  <strong>{selectedOrder.paymentMethod === 'karta' ? 'Karta orqali' : 'Qo\'lga olganda'}</strong>
+                </div>
                 <div className="orders-modal-row total">
                   <span>Jami to'lov:</span>
                   <strong>{formatMoney(selectedOrder.totalAmount)}</strong>

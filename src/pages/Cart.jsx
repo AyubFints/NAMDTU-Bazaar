@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle, CreditCard, Truck } from 'lucide-react';
 import './Cart.css';
 
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, toggleSelect, selectAll, removeSelected, clearCart } = useCart();
   const { user } = useAuth();
   const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCardDetailsModal, setShowCardDetailsModal] = useState(false);
   const [phone, setPhone] = useState(user?.phone || '');
+  const [purchasedItems, setPurchasedItems] = useState([]);
 
   const formatMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
 
@@ -23,7 +26,6 @@ const Cart = () => {
     return acc + (price * item.quantity);
   }, 0);
 
-  // MOCK: Generate some fake discount logic based on oldPrice
   const totalDiscount = selectedItems.reduce((acc, item) => {
     const price = parseFloat(String(item.price).replace(/\D/g, '')) || 0;
     const oldPrice = item.oldPrice ? parseFloat(String(item.oldPrice).replace(/\D/g, '')) : 0;
@@ -33,7 +35,6 @@ const Cart = () => {
     return acc;
   }, 0);
 
-  // If no mock discounts exist, let's just create a small dummy discount to match the design visually if total > 100,000
   const finalDiscount = totalDiscount > 0 ? totalDiscount : (totalBasePrice > 100000 ? Math.floor(totalBasePrice * 0.1) : 0);
   const deliveryCost = 3000;
   const grandTotal = totalBasePrice - finalDiscount;
@@ -47,10 +48,14 @@ const Cart = () => {
     );
   }
 
-  const handleCheckoutSubmit = async (e) => {
+  const handlePhoneSubmit = (e) => {
     e.preventDefault();
     if (!phone.trim()) return;
+    setShowPhoneModal(false);
+    setShowPaymentModal(true);
+  };
 
+  const handleCheckoutSubmit = async (method) => {
     try {
       const response = await api.post('/orders', {
         buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
@@ -60,24 +65,32 @@ const Cart = () => {
           quantity: item.quantity,
           price: item.price,
           size: item.size || null,
-          image: (item.images && item.images.length > 0) ? item.images[0] : item.image
+          image: (item.images && item.images.length > 0) ? item.images[0] : item.image,
+          cardNumber: item.cardNumber,
+          cardHolderName: item.cardHolderName
         })),
         totalAmount: grandTotal,
+        paymentMethod: method,
         address: 'Kiritilmagan',
         comment: ''
       });
 
-      // Save order id for "My Orders" feature
       if (response.data && response.data.id) {
         const savedIds = JSON.parse(localStorage.getItem('my_order_ids') || '[]');
         savedIds.push(response.data.id);
         localStorage.setItem('my_order_ids', JSON.stringify(savedIds));
       }
 
-      // Clear cart and show success
-      setShowPhoneModal(false);
-      setShowSuccessModal(true);
-      removeSelected(); // Remove purchased items from cart
+      setPurchasedItems(selectedItems); // store for card details display
+      setShowPaymentModal(false);
+      
+      if (method === 'karta') {
+        setShowCardDetailsModal(true);
+      } else {
+        setShowSuccessModal(true);
+      }
+      
+      removeSelected();
     } catch (error) {
       console.error(error);
       alert("Buyurtmani yuborishda xatolik yuz berdi: " + (error.response?.data?.message || error.message));
@@ -89,9 +102,7 @@ const Cart = () => {
       <h1 className="cart-title">Savatingiz, <span>{cart.length} mahsulot</span></h1>
       
       <div className="cart-layout">
-        {/* Left Col: Cart Items */}
         <div className="cart-items-section">
-          {/* Header controls */}
           <div className="cart-controls-header">
             <label className="cart-checkbox-wrapper">
               <div className={`custom-checkbox ${allSelected ? 'checked' : ''}`} onClick={() => selectAll(!allSelected)}>
@@ -104,7 +115,6 @@ const Cart = () => {
             </button>
           </div>
 
-          {/* Items List */}
           <div className="cart-items-list">
             <div className="cart-delivery-header">
               <span>NAMDTU Bazaar yetkazib berishi</span>
@@ -113,9 +123,8 @@ const Cart = () => {
 
             {cart.map(item => {
               const productImg = (item.images && item.images.length > 0) 
-              ? item.images[0] 
-              : (item.image || "https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=500&auto=format&fit=crop&q=60");
-              
+                ? item.images[0] 
+                : (item.image || "https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=500&auto=format&fit=crop&q=60");
               const price = parseFloat(String(item.price).replace(/\D/g, '')) || 0;
               const oldPrice = item.oldPrice ? parseFloat(String(item.oldPrice).replace(/\D/g, '')) : 0;
               
@@ -163,43 +172,27 @@ const Cart = () => {
                           if (item.quantity < maxStock) {
                             updateQuantity(item.id, 1);
                           } else {
-                            alert("Omborda yetarli miqdor yo'q!");
+                            alert(`Bazada faqat ${maxStock} ta qolgan.`);
                           }
                         }}
                       >
                         <Plus size={16} />
                       </button>
                     </div>
-
-                    <div className="cart-item-price-block">
-                      <div className="cart-item-price">{formatMoney(price * item.quantity)}</div>
-                      {(oldPrice > 0 || oldPrice > price) && (
-                        <div className="cart-item-old-price">{formatMoney((oldPrice > 0 ? oldPrice : Math.floor(price * 1.2)) * item.quantity)}</div>
+                    
+                    <div className="cart-item-pricing">
+                      <div className="current-price">{formatMoney(price * item.quantity)}</div>
+                      {oldPrice > price && (
+                        <div className="old-price">{formatMoney(oldPrice * item.quantity)}</div>
                       )}
                     </div>
-                    
-                    <button className="cart-item-remove-icon" onClick={() => removeFromCart(item.id)}>
-                      <Trash2 size={20} />
-                    </button>
                   </div>
                 </div>
               );
             })}
           </div>
-
-          <div className="cart-upsell-banner">
-            <div className="cart-upsell-img">
-              <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=100&q=60" alt="" />
-            </div>
-            <div className="cart-upsell-text">
-              <strong>Kerak bo'lib qolishi mumkin</strong>
-              <span>Siz uchun tovarlar to'plami</span>
-            </div>
-            <ChevronRight size={20} color="#94a3b8" />
-          </div>
         </div>
 
-        {/* Right Col: Summary */}
         <div className="cart-summary-section">
           {totalBasePrice > 0 && grandTotal < 100000 && (
             <div className="cart-summary-delivery-note">
@@ -235,7 +228,6 @@ const Cart = () => {
         </div>
       </div>
 
-      {/* Checkout Phone Modal */}
       {showPhoneModal && (
         <div className="cart-modal-overlay" onClick={() => setShowPhoneModal(false)}>
           <div className="cart-modal" onClick={(e) => e.stopPropagation()}>
@@ -244,7 +236,7 @@ const Cart = () => {
             </button>
             <h2>Buyurtmani rasmiylashtirish</h2>
             <p>Iltimos, telefon raqamingizni kiriting. Biz siz bilan tez orada bog'lanamiz.</p>
-            <form onSubmit={handleCheckoutSubmit}>
+            <form onSubmit={handlePhoneSubmit}>
               <input 
                 type="text" 
                 placeholder="+998 (__) ___-__-__" 
@@ -252,13 +244,74 @@ const Cart = () => {
                 onChange={(e) => setPhone(e.target.value)}
                 required
               />
-              <button type="submit" className="cart-modal-submit">Tasdiqlash</button>
+              <button type="submit" className="cart-modal-submit">Davom etish</button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Success Modal */}
+      {showPaymentModal && (
+        <div className="cart-modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="cart-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="cart-modal-close" onClick={() => setShowPaymentModal(false)}>
+              <X size={20} />
+            </button>
+            <h2>To'lov turi</h2>
+            <p>Qanday to'lov qilmoqchisiz?</p>
+            
+            <div className="payment-options">
+              <button className="payment-option-btn" onClick={() => handleCheckoutSubmit('karta')}>
+                <CreditCard size={24} />
+                <span>Karta orqali</span>
+              </button>
+              <button className="payment-option-btn" onClick={() => handleCheckoutSubmit('naqd')}>
+                <Truck size={24} />
+                <span>Tovarni qo'lga olganda</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCardDetailsModal && (
+        <div className="cart-modal-overlay" onClick={() => {
+          setShowCardDetailsModal(false);
+          setShowSuccessModal(true);
+        }}>
+          <div className="cart-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="cart-modal-close" onClick={() => {
+              setShowCardDetailsModal(false);
+              setShowSuccessModal(true);
+            }}>
+              <X size={20} />
+            </button>
+            <h2>Karta raqamlari</h2>
+            <p>Siz xarid qilgan mahsulotlar uchun quyidagi kartalarga to'lov qiling:</p>
+            
+            <div className="card-details-list" style={{ maxHeight: '300px', overflowY: 'auto', margin: '20px 0' }}>
+              {purchasedItems.map((item, idx) => (
+                <div key={idx} style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '10px', marginBottom: '10px' }}>
+                  <div style={{ fontWeight: '600', marginBottom: '5px', fontSize: '15px' }}>{item.name}</div>
+                  <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>
+                    Sotuvchi: {item.cardHolderName || "Kiritilmagan"}
+                  </div>
+                  <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '2px' }}>
+                    {item.cardNumber || "Karta kiritilmagan"}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button className="cart-modal-submit" onClick={() => {
+              setShowCardDetailsModal(false);
+              setShowSuccessModal(true);
+            }}>
+              To'ladim
+            </button>
+          </div>
+        </div>
+      )}
+
       {showSuccessModal && (
         <div className="cart-modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="cart-success-modal" onClick={(e) => e.stopPropagation()}>

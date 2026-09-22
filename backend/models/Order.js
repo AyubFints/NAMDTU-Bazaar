@@ -23,6 +23,10 @@ const Order = sequelize.define('Order', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    defaultValue: 'cash'
+  },
   status: {
     type: DataTypes.ENUM('Yangi', 'Yetkazilmoqda', 'Sotildi', 'Bekor qilingan'),
     defaultValue: 'Yangi'

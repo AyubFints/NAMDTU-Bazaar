@@ -48,6 +48,12 @@ const Product = sequelize.define('Product', {
   creatorName: {
     type: DataTypes.STRING
   },
+  cardNumber: {
+    type: DataTypes.STRING
+  },
+  cardHolderName: {
+    type: DataTypes.STRING
+  },
   status: {
     type: DataTypes.ENUM('pending', 'approved', 'rejected'),
     defaultValue: 'pending'

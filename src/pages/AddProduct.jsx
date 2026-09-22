@@ -13,7 +13,9 @@ const AddProduct = () => {
     price: '',
     category: '',
     description: '',
-    image: null
+    image: null,
+    cardNumber: '',
+    cardHolderName: ''
   });
 
   const handleChange = (e) => {
@@ -44,7 +46,9 @@ const AddProduct = () => {
         category: formData.category,
         description: formData.description,
         images: formData.image ? [formData.image] : [],
-        stock: '10' // Default stock for now
+        stock: '10', // Default stock for now
+        cardNumber: formData.cardNumber,
+        cardHolderName: formData.cardHolderName
       });
       if (user.role === 'admin') {
         alert("Mahsulot muvaffaqiyatli qo'shildi va darhol sotuvga chiqdi!");
@@ -93,6 +97,17 @@ const AddProduct = () => {
           <div className="form-group">
             <label className="form-label">Mahsulot Ta'rifi</label>
             <textarea name="description" className="form-control" rows="4" placeholder="Mahsulotingiz haqida batafsil ma'lumot bering..." value={formData.description} onChange={handleChange}></textarea>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group flex-1">
+              <label className="form-label">Karta raqami</label>
+              <input type="text" name="cardNumber" className="form-control" placeholder="16 talik raqam" value={formData.cardNumber} onChange={handleChange} required />
+            </div>
+            <div className="form-group flex-1">
+              <label className="form-label">Karta egasi</label>
+              <input type="text" name="cardHolderName" className="form-control" placeholder="Ism Familiya" value={formData.cardHolderName} onChange={handleChange} required />
+            </div>
           </div>
           
           <div className="form-group">
