@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle, CreditCard, Truck, UploadCloud } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle, CreditCard, Truck, UploadCloud, Copy } from 'lucide-react';
 import './Cart.css';
 
 const Cart = () => {
@@ -18,6 +18,18 @@ const Cart = () => {
   // Receipt upload state
   const [receiptImage, setReceiptImage] = useState(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+
+  const [copiedCardIndex, setCopiedCardIndex] = useState(null);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+
+  const handleCopyCardNumber = (cardNumber, idx) => {
+    navigator.clipboard.writeText(cardNumber);
+    setCopiedCardIndex(idx);
+    setTimeout(() => {
+      setCopiedCardIndex(null);
+    }, 2000);
+  };
 
   const formatMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
 
@@ -104,6 +116,7 @@ const Cart = () => {
   };
 
   const submitOrder = async (method, receiptStr) => {
+    setIsSubmittingOrder(true);
     try {
       const response = await api.post('/orders', {
         buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
@@ -131,10 +144,17 @@ const Cart = () => {
         localStorage.setItem('my_order_ids', JSON.stringify(savedIds));
       }
 
-      setShowCardDetailsModal(false);
-      setShowSuccessModal(true);
-      removeSelected();
+      setIsSubmitSuccess(true);
+      setTimeout(() => {
+        setIsSubmittingOrder(false);
+        setIsSubmitSuccess(false);
+        setShowCardDetailsModal(false);
+        setShowSuccessModal(true);
+        removeSelected();
+      }, 1200);
+
     } catch (error) {
+      setIsSubmittingOrder(false);
       console.error(error);
       alert("Buyurtmani yuborishda xatolik yuz berdi: " + (error.response?.data?.message || error.message));
     }
@@ -337,8 +357,17 @@ const Cart = () => {
                       Karta egasi: {item.cardHolderName || "Kiritilmagan"}
                       {item.cardType && <span style={{ marginLeft: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#334155', fontWeight: 'bold' }}>{item.cardType}</span>}
                     </div>
-                    <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '1px', userSelect: 'all' }}>
-                      {item.cardNumber || "Karta kiritilmagan"}
+                    <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ userSelect: 'all' }}>{item.cardNumber || "Karta kiritilmagan"}</span>
+                      {item.cardNumber && (
+                        <button 
+                          className="card-copy-btn" 
+                          onClick={() => handleCopyCardNumber(item.cardNumber, idx)}
+                          title="Nusxalash"
+                        >
+                          {copiedCardIndex === idx ? <Check size={18} color="#10b981" /> : <Copy size={18} />}
+                        </button>
+                      )}
                     </div>
                     <div style={{ marginTop: '8px', fontWeight: '600', color: '#ef4444', fontSize: '14px' }}>
                       To'lanadigan summa: {formatMoney(itemPrice * item.quantity)}
@@ -349,8 +378,8 @@ const Cart = () => {
             </div>
 
             <div className="receipt-upload-section" onPaste={handlePaste}>
-              <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '15px' }}>To'lov chekini yuklang (majburiy)</div>
-              <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>Rasmni shu yerga Ctrl+C/Ctrl+V qilib tashlang yoki galereyadan tanlang.</div>
+              <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '15px' }}>Chek rasmini yuklang (majburiy)</div>
+              <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>Chek rasmini galereyadan tanlang yoki kompyuterda Ctrl+V qilib joylang.</div>
               
               <div className="receipt-upload-box">
                 <input 
@@ -373,23 +402,33 @@ const Cart = () => {
               </div>
             </div>
             
-            <button 
-              className={`cart-modal-submit ${!receiptImage ? 'disabled' : ''}`}
-              onClick={() => {
-                if (receiptImage && !isUploadingReceipt) submitOrder('karta', receiptImage);
-              }}
-              disabled={!receiptImage || isUploadingReceipt}
-              style={{
-                background: receiptImage ? 'rgb(10, 16, 82)' : '#fff',
-                color: receiptImage ? '#fff' : '#94a3b8',
-                border: receiptImage ? 'none' : '1px solid #cbd5e1',
-                cursor: receiptImage ? 'pointer' : 'not-allowed',
-                marginTop: '15px',
-                transition: 'all 0.3s'
-              }}
-            >
-              Tasdiqlash
-            </button>
+            <div style={{ position: 'relative', marginTop: '15px' }}>
+              <button 
+                className={`cart-modal-submit ${!receiptImage ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (receiptImage && !isUploadingReceipt) submitOrder('karta', receiptImage);
+                }}
+                disabled={!receiptImage || isUploadingReceipt || isSubmittingOrder}
+                style={{
+                  background: receiptImage ? 'rgb(10, 16, 82)' : '#fff',
+                  color: receiptImage ? '#fff' : '#94a3b8',
+                  border: receiptImage ? 'none' : '1px solid #cbd5e1',
+                  cursor: receiptImage ? 'pointer' : 'not-allowed',
+                  width: '100%',
+                  transition: 'all 0.3s'
+                }}
+              >
+                Tasdiqlash
+              </button>
+
+              {isSubmittingOrder && (
+                <div className="submit-loading-overlay">
+                  <div className={`submit-spinner-icon ${isSubmitSuccess ? 'success-pop' : 'spinning'}`}>
+                    <CheckCircle size={48} />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
