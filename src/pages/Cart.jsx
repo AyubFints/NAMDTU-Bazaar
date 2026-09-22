@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle, CreditCard, Truck } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, ChevronRight, X, CheckCircle, CreditCard, Truck, UploadCloud } from 'lucide-react';
 import './Cart.css';
 
 const Cart = () => {
@@ -14,6 +14,10 @@ const Cart = () => {
   const [showCardDetailsModal, setShowCardDetailsModal] = useState(false);
   const [phone, setPhone] = useState(user?.phone || '');
   const [purchasedItems, setPurchasedItems] = useState([]);
+  
+  // Receipt upload state
+  const [receiptImage, setReceiptImage] = useState(null);
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
 
   const formatMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
 
@@ -55,7 +59,51 @@ const Cart = () => {
     setShowPaymentModal(true);
   };
 
-  const handleCheckoutSubmit = async (method) => {
+  const handlePaymentSelection = (method) => {
+    setShowPaymentModal(false);
+    if (method === 'karta') {
+      setPurchasedItems(selectedItems);
+      setReceiptImage(null);
+      setIsUploadingReceipt(false);
+      setShowCardDetailsModal(true);
+    } else {
+      submitOrder('naqd', null);
+    }
+  };
+
+  const processImageFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    setIsUploadingReceipt(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Simulate 1 second upload loading
+      setTimeout(() => {
+        setReceiptImage(reader.result);
+        setIsUploadingReceipt(false);
+      }, 1000); 
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        processImageFile(file);
+        break;
+      }
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      processImageFile(e.target.files[0]);
+    }
+  };
+
+  const submitOrder = async (method, receiptStr) => {
     try {
       const response = await api.post('/orders', {
         buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
@@ -71,6 +119,7 @@ const Cart = () => {
         })),
         totalAmount: grandTotal,
         paymentMethod: method,
+        receiptImage: receiptStr,
         address: 'Kiritilmagan',
         comment: ''
       });
@@ -81,15 +130,8 @@ const Cart = () => {
         localStorage.setItem('my_order_ids', JSON.stringify(savedIds));
       }
 
-      setPurchasedItems(selectedItems); // store for card details display
-      setShowPaymentModal(false);
-      
-      if (method === 'karta') {
-        setShowCardDetailsModal(true);
-      } else {
-        setShowSuccessModal(true);
-      }
-      
+      setShowCardDetailsModal(false);
+      setShowSuccessModal(true);
       removeSelected();
     } catch (error) {
       console.error(error);
@@ -260,11 +302,11 @@ const Cart = () => {
             <p>Qanday to'lov qilmoqchisiz?</p>
             
             <div className="payment-options">
-              <button className="payment-option-btn" onClick={() => handleCheckoutSubmit('karta')}>
+              <button className="payment-option-btn" onClick={() => handlePaymentSelection('karta')}>
                 <CreditCard size={24} />
                 <span>Karta orqali</span>
               </button>
-              <button className="payment-option-btn" onClick={() => handleCheckoutSubmit('naqd')}>
+              <button className="payment-option-btn" onClick={() => handlePaymentSelection('naqd')}>
                 <Truck size={24} />
                 <span>Tovarni qo'lga olganda</span>
               </button>
@@ -274,39 +316,77 @@ const Cart = () => {
       )}
 
       {showCardDetailsModal && (
-        <div className="cart-modal-overlay" onClick={() => {
-          setShowCardDetailsModal(false);
-          setShowSuccessModal(true);
-        }}>
+        <div className="cart-modal-overlay" onClick={() => setShowCardDetailsModal(false)}>
           <div className="cart-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="cart-modal-close" onClick={() => {
-              setShowCardDetailsModal(false);
-              setShowSuccessModal(true);
-            }}>
+            <button className="cart-modal-close" onClick={() => setShowCardDetailsModal(false)}>
               <X size={20} />
             </button>
-            <h2>Karta raqamlari</h2>
-            <p>Siz xarid qilgan mahsulotlar uchun quyidagi kartalarga to'lov qiling:</p>
+            <h2>Karta orqali to'lov</h2>
+            <p style={{ color: '#1a1a2e', fontWeight: '500' }}>
+              Mana shu karta raqamiga tovarning narxini qo'shib to'lovni amalga oshiring:
+            </p>
             
-            <div className="card-details-list" style={{ maxHeight: '300px', overflowY: 'auto', margin: '20px 0' }}>
-              {purchasedItems.map((item, idx) => (
-                <div key={idx} style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '10px', marginBottom: '10px' }}>
-                  <div style={{ fontWeight: '600', marginBottom: '5px', fontSize: '15px' }}>{item.name}</div>
-                  <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>
-                    Sotuvchi: {item.cardHolderName || "Kiritilmagan"}
+            <div className="card-details-list" style={{ maxHeight: '200px', overflowY: 'auto', margin: '15px 0' }}>
+              {purchasedItems.map((item, idx) => {
+                const itemPrice = parseFloat(String(item.price).replace(/\D/g, '')) || 0;
+                return (
+                  <div key={idx} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '10px', marginBottom: '10px' }}>
+                    <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '14px' }}>{item.name}</div>
+                    <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px' }}>
+                      Karta egasi: {item.cardHolderName || "Kiritilmagan"}
+                    </div>
+                    <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '1px', userSelect: 'all' }}>
+                      {item.cardNumber || "Karta kiritilmagan"}
+                    </div>
+                    <div style={{ marginTop: '8px', fontWeight: '600', color: '#ef4444', fontSize: '14px' }}>
+                      To'lanadigan summa: {formatMoney(itemPrice * item.quantity)}
+                    </div>
                   </div>
-                  <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', color: '#1a1a2e', letterSpacing: '2px' }}>
-                    {item.cardNumber || "Karta kiritilmagan"}
+                );
+              })}
+            </div>
+
+            <div className="receipt-upload-section" onPaste={handlePaste}>
+              <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '15px' }}>To'lov chekini yuklang (majburiy)</div>
+              <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>Rasmni shu yerga Ctrl+C/Ctrl+V qilib tashlang yoki galereyadan tanlang.</div>
+              
+              <div className="receipt-upload-box">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileSelect} 
+                  title=""
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }} 
+                />
+                {isUploadingReceipt ? (
+                  <div className="receipt-loading-spinner"></div>
+                ) : receiptImage ? (
+                  <img src={receiptImage} alt="Chek" className="receipt-preview" />
+                ) : (
+                  <div className="receipt-placeholder">
+                    <UploadCloud size={32} color="#cbd5e1" />
+                    <span>Rasmni yuklash (Ctrl+V)</span>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
             
-            <button className="cart-modal-submit" onClick={() => {
-              setShowCardDetailsModal(false);
-              setShowSuccessModal(true);
-            }}>
-              To'ladim
+            <button 
+              className={`cart-modal-submit ${!receiptImage ? 'disabled' : ''}`}
+              onClick={() => {
+                if (receiptImage && !isUploadingReceipt) submitOrder('karta', receiptImage);
+              }}
+              disabled={!receiptImage || isUploadingReceipt}
+              style={{
+                background: receiptImage ? 'rgb(10, 16, 82)' : '#fff',
+                color: receiptImage ? '#fff' : '#94a3b8',
+                border: receiptImage ? 'none' : '1px solid #cbd5e1',
+                cursor: receiptImage ? 'pointer' : 'not-allowed',
+                marginTop: '15px',
+                transition: 'all 0.3s'
+              }}
+            >
+              Tasdiqlash
             </button>
           </div>
         </div>

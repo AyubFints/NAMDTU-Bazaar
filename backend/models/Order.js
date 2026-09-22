@@ -27,6 +27,9 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     defaultValue: 'cash'
   },
+  receiptImage: {
+    type: DataTypes.TEXT
+  },
   status: {
     type: DataTypes.ENUM('Yangi', 'Yetkazilmoqda', 'Sotildi', 'Bekor qilingan'),
     defaultValue: 'Yangi'
