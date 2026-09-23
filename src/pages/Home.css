@@ -140,30 +140,40 @@
 }
 
 .hero-slider-section {
-  margin-bottom: 50px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .slider-container {
   position: relative;
-  width: 1920px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  height: 300px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
-  border: 3px solid #ffffff;
 }
 
 .slider-track {
   display: flex;
-  height: 100%;
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  height: 350px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  gap: 16px;
+  padding: 0;
+}
+
+.slider-track::-webkit-scrollbar {
+  display: none;
 }
 
 .slide {
-  min-width: 100%;
+  flex: 0 0 75%;
   height: 100%;
+  scroll-snap-align: start;
+  border-radius: 20px;
+  overflow: hidden;
   position: relative;
 }
 
@@ -283,29 +293,17 @@
 }
 
 @media (max-width: 768px) {
-  .slider-container {
-    height: 110px; /* Ozg'in va uzun banner formati */
+  .slider-track {
+    height: 180px;
+  }
+  
+  .slide {
+    flex: 0 0 90%;
     border-radius: 12px;
   }
   
   .slider-arrow {
-    display: flex; /* Telefonda ham ko'rinadi */
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.6);
-  }
-
-  .slider-arrow svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .slider-arrow.left {
-    left: 8px;
-  }
-
-  .slider-arrow.right {
-    right: 8px;
+    display: none;
   }
 
   .slide-overlay {

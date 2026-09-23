@@ -59,6 +59,7 @@ const Home = () => {
   const [banners, setBanners] = useState(HERO_SLIDES);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
+  const sliderRef = useRef(null);
   
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
@@ -108,17 +109,37 @@ const Home = () => {
   // Auto-advance slider
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % banners.length);
+      if (sliderRef.current) {
+        const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+        if (sliderRef.current.scrollLeft + sliderRef.current.offsetWidth >= sliderRef.current.scrollWidth - 10) {
+          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          sliderRef.current.scrollBy({ left: slideWidth, behavior: 'smooth' });
+        }
+      }
     }, 5000);
     return () => clearInterval(timer);
   }, [banners.length]);
 
+  const handleSliderScroll = () => {
+    if (!sliderRef.current) return;
+    const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+    const index = Math.round(sliderRef.current.scrollLeft / slideWidth);
+    setCurrentSlide(index);
+  };
+
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % banners.length);
+    if (sliderRef.current) {
+      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+      sliderRef.current.scrollBy({ left: slideWidth, behavior: 'smooth' });
+    }
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+    if (sliderRef.current) {
+      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+      sliderRef.current.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+    }
   };
 
   const activeCatObj = CATEGORIES_LIST.find(c => c.id === activeCategory) || CATEGORIES_LIST[0];
@@ -126,6 +147,50 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      {activeCategory === 'all' && (
+        <section className="hero-slider-section">
+          <div className="slider-container">
+            <button className="slider-arrow left" onClick={prevSlide}>
+              <ChevronLeft size={28} />
+            </button>
+            
+            <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
+              {banners.map(slide => (
+                <div className="slide" key={slide.id}>
+                  {(slide.title || slide.subtitle) && (
+                    <div className="slide-overlay">
+                      {slide.title && <h2 className="slide-title">{slide.title}</h2>}
+                      {slide.subtitle && <p className="slide-subtitle">{slide.subtitle}</p>}
+                      <button className="slide-cta">Batafsil ko'rish</button>
+                    </div>
+                  )}
+                  <img src={slide.image} alt={slide.title || "Banner"} />
+                </div>
+              ))}
+            </div>
+
+            <button className="slider-arrow right" onClick={nextSlide}>
+              <ChevronRight size={28} />
+            </button>
+
+            <div className="slider-dots">
+              {banners.map((_, idx) => (
+                <span 
+                  key={idx} 
+                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
+                  onClick={() => {
+                    if (sliderRef.current) {
+                      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+                      sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
+                    }
+                  }}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="categories-bar">
         {/* Mobile: Shows only the currently selected category */}
         <button className="category-tag highlight mobile-active-tag">
@@ -183,45 +248,6 @@ const Home = () => {
             </div>
           ))}
         </div>
-      )}
-
-      {activeCategory === 'all' && (
-        <section className="hero-slider-section">
-          <div className="slider-container">
-            <button className="slider-arrow left" onClick={prevSlide}>
-              <ChevronLeft size={28} />
-            </button>
-            
-            <div className="slider-track" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-              {banners.map(slide => (
-                <div className="slide" key={slide.id}>
-                  {(slide.title || slide.subtitle) && (
-                    <div className="slide-overlay">
-                      {slide.title && <h2 className="slide-title">{slide.title}</h2>}
-                      {slide.subtitle && <p className="slide-subtitle">{slide.subtitle}</p>}
-                      <button className="slide-cta">Batafsil ko'rish</button>
-                    </div>
-                  )}
-                  <img src={slide.image} alt={slide.title || "Banner"} />
-                </div>
-              ))}
-            </div>
-
-            <button className="slider-arrow right" onClick={nextSlide}>
-              <ChevronRight size={28} />
-            </button>
-
-            <div className="slider-dots">
-              {banners.map((_, idx) => (
-                <span 
-                  key={idx} 
-                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
-                  onClick={() => setCurrentSlide(idx)}
-                ></span>
-              ))}
-            </div>
-          </div>
-        </section>
       )}
 
       <section className="products-section">
