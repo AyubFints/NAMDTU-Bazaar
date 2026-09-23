@@ -293,10 +293,11 @@
 @media (max-width: 768px) {
   .slider-track {
     height: 140px;
+    gap: 8px;
   }
   
   .slide {
-    flex: 0 0 92%;
+    flex: 0 0 88%;
     border-radius: 12px;
   }
   
