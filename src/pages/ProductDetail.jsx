@@ -265,7 +265,7 @@ const ProductDetail = () => {
               {/* Desktop Action block (Mobile uses fixed bottom bar) */}
               <div className="pd-price-row-desktop">
                 <span className="pd-current-price-large">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
-                {numericOldPrice > 0 && <span className="pd-old-price-large" style={{marginLeft: 8}}>{formatMoney(numericOldPrice)}</span>}
+                {numericOldPrice > 0 && <span className="pd-old-price-large">{formatMoney(numericOldPrice)}</span>}
               </div>
 
               <div className="pd-action-row">
