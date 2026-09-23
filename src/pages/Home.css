@@ -167,7 +167,7 @@
 }
 
 .slide {
-  flex: 0 0 88%;
+  flex: 0 0 1000px;
   height: 100%;
   scroll-snap-align: start;
   border-radius: 20px;

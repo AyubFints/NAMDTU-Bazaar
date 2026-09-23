@@ -166,13 +166,6 @@ const Home = () => {
             <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
               {banners.map(slide => (
                 <div className="slide" key={slide.id}>
-                  {(slide.title || slide.subtitle) && (
-                    <div className="slide-overlay">
-                      {slide.title && <h2 className="slide-title">{slide.title}</h2>}
-                      {slide.subtitle && <p className="slide-subtitle">{slide.subtitle}</p>}
-                      <button className="slide-cta">Batafsil ko'rish</button>
-                    </div>
-                  )}
                   <img src={slide.image} alt={slide.title || "Banner"} />
                 </div>
               ))}
