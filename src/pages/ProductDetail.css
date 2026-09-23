@@ -297,6 +297,10 @@
 /* Sizes */
 .pd-sizes-section {
   margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
 }
 .pd-sizes-title {
   font-size: 14px;
