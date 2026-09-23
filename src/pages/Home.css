@@ -153,7 +153,7 @@
 
 .slider-track {
   display: flex;
-  height: 440px;
+  height: 350px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
@@ -167,7 +167,8 @@
 }
 
 .slide {
-  flex: 0 0 100%;
+  flex: 0 0 1200px;
+  max-width: 1200px;
   height: 100%;
   scroll-snap-align: start;
   border-radius: 8px;
