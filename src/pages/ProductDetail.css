@@ -1,5 +1,5 @@
 .pd-page {
-  padding-bottom: 80px;
+  padding: 0 20px 80px 20px;
   min-height: 100vh;
   position: relative;
   background-color: #f8fafc;
