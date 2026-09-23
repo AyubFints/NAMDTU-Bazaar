@@ -106,11 +106,20 @@ const Home = () => {
     };
   }, []);
 
+  const getSlideWidth = () => {
+    if (!sliderRef.current) return 0;
+    const slide = sliderRef.current.querySelector('.slide');
+    if (!slide) return sliderRef.current.offsetWidth;
+    const style = window.getComputedStyle(sliderRef.current);
+    const gap = parseFloat(style.gap) || 0;
+    return slide.offsetWidth + gap;
+  };
+
   // Auto-advance slider
   useEffect(() => {
     const timer = setInterval(() => {
       if (sliderRef.current) {
-        const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+        const slideWidth = getSlideWidth();
         if (sliderRef.current.scrollLeft + sliderRef.current.offsetWidth >= sliderRef.current.scrollWidth - 10) {
           sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -123,21 +132,21 @@ const Home = () => {
 
   const handleSliderScroll = () => {
     if (!sliderRef.current) return;
-    const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+    const slideWidth = getSlideWidth();
     const index = Math.round(sliderRef.current.scrollLeft / slideWidth);
     setCurrentSlide(index);
   };
 
   const nextSlide = () => {
     if (sliderRef.current) {
-      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+      const slideWidth = getSlideWidth();
       sliderRef.current.scrollBy({ left: slideWidth, behavior: 'smooth' });
     }
   };
 
   const prevSlide = () => {
     if (sliderRef.current) {
-      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+      const slideWidth = getSlideWidth();
       sliderRef.current.scrollBy({ left: -slideWidth, behavior: 'smooth' });
     }
   };
@@ -180,7 +189,7 @@ const Home = () => {
                   className={`dot ${idx === currentSlide ? 'active' : ''}`} 
                   onClick={() => {
                     if (sliderRef.current) {
-                      const slideWidth = sliderRef.current.offsetWidth * 0.75 + 16;
+                      const slideWidth = getSlideWidth();
                       sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
                     }
                   }}
