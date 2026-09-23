@@ -38,12 +38,6 @@ const HERO_SLIDES = [
     subtitle: "O'z qo'l mehnatingiz bilan yaratgan mahsulotlarni soting va tengdoshlaringizning ajoyib ishlarini xarid qiling."
   },
   {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1511130558090-00af810c2111?w=1200&auto=format&fit=crop&q=80",
-    title: "Kuzgi kiyimlar to'plami",
-    subtitle: "Kuz fasli uchun issiq va zamonaviy kiyimlar"
-  },
-  {
     id: 3,
     image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&auto=format&fit=crop&q=80",
     title: "Onalar va bolalar uchun",
