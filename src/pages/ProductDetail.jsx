@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Heart, Star, ChevronLeft, ChevronRight, Minus, Plus, CheckCircle, ShoppingBag } from 'lucide-react';
+import { Heart, Star, ChevronLeft, ChevronRight, Minus, Plus, CheckCircle, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -18,6 +18,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [showAllSizes, setShowAllSizes] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [activeTab, setActiveTab] = useState('description');
@@ -281,7 +282,7 @@ const ProductDetail = () => {
                 razmer: <strong>{selectedSize || '—'}</strong>
               </div>
               <div className="pd-sizes-list">
-                {product.sizes.map((sz, idx) => (
+                {product.sizes.slice(0, showAllSizes ? product.sizes.length : 5).map((sz, idx) => (
                   <button
                     key={idx}
                     className={`pd-size-btn ${selectedSize === sz.size ? 'active' : ''} ${sz.stock <= 0 ? 'disabled' : ''}`}
@@ -291,6 +292,15 @@ const ProductDetail = () => {
                     {sz.size}
                   </button>
                 ))}
+                {product.sizes.length > 5 && (
+                  <button 
+                    className="pd-size-btn pd-size-toggle" 
+                    onClick={() => setShowAllSizes(!showAllSizes)}
+                    style={{ padding: '0 8px', background: 'transparent', border: '1px solid #e2e8f0' }}
+                  >
+                    {showAllSizes ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                  </button>
+                )}
               </div>
               <button className="pd-sizes-link" onClick={() => setActiveTab('sizes')}>O'lchamlar haqida batafsil</button>
             </div>
