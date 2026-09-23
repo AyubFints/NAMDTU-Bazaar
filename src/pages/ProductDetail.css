@@ -30,8 +30,8 @@
 @media (min-width: 769px) {
   .pd-top {
     display: grid;
-    grid-template-columns: 72px 420px 1fr 480px;
-    gap: 24px;
+    grid-template-columns: 72px 420px 1fr 380px;
+    gap: 40px;
     margin-bottom: 40px;
     align-items: flex-start;
   }
@@ -355,6 +355,8 @@
   border-radius: 16px;
   padding: 16px;
   border: 1px solid #e2e8f0;
+  width: 100%;
+  box-sizing: border-box;
 }
 @media(max-width: 768px) {
   .uzum-info-card {
@@ -703,4 +705,24 @@
 }
 .pd-title {
   margin-top: 0;
+}
+
+@media (min-width: 769px) {
+  .pd-top {
+    grid-template-columns: 72px 420px 1fr 380px !important;
+    column-gap: 50px !important;
+  }
+  .pd-order-card {
+    background: #ffffff !important;
+    padding: 24px !important;
+    border-radius: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .uzum-info-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
