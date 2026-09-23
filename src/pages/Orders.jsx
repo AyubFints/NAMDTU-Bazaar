@@ -74,7 +74,7 @@ const Orders = () => {
               
             const statusText = 
               order.status === 'Yangi' ? 'Tayyorlanmoqda' : 
-              order.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Yetkazildi';
+              order.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Tasdiqlangan va sotib olingan';
 
             // Show main image of first item
             const firstItemImg = order.items && order.items[0] 
