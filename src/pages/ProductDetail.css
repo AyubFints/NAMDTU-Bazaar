@@ -709,8 +709,8 @@
 
 @media (min-width: 769px) {
   .pd-top {
-    grid-template-columns: 72px 420px 400px 400px !important;
-    gap: 16px !important;
+    grid-template-columns: 72px 500px 400px 400px !important;
+    gap: 40px !important;
     justify-content: start !important;
     width: auto !important;
   }
