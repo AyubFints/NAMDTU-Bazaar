@@ -710,9 +710,9 @@
 @media (min-width: 769px) {
   .pd-top {
     grid-template-columns: 72px 420px 400px 400px !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    
+    gap: 16px !important;
+    justify-content: start !important;
+    width: auto !important;
   }
   .pd-order-card {
     background: #ffffff !important;
