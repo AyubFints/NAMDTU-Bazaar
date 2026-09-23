@@ -754,3 +754,15 @@
     margin-left: 0 !important;
   }
 }
+
+@media (max-width: 768px) {
+  .pd-price-row-desktop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .pd-price-card {
+    display: none !important;
+  }
+}
