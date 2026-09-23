@@ -30,7 +30,7 @@
 @media (min-width: 769px) {
   .pd-top {
     display: grid;
-    grid-template-columns: 72px 420px 1.2fr 390px;
+    grid-template-columns: 72px 420px 1fr 350px;
     gap: 24px;
     margin-bottom: 40px;
     align-items: flex-start;
@@ -130,6 +130,27 @@
     top: 24px;
     align-self: start;
   }
+  
+  .pd-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .pd-price-card {
+    display: none;
+  }
+  
+  .pd-order-card {
+    position: static;
+  }
+  
+  .pd-price-row-desktop {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: baseline;
+  }
+
 }
 
 /* MOBILE LAYOUT */

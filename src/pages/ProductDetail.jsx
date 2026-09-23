@@ -225,7 +225,10 @@ const ProductDetail = () => {
         </div>
 
         {/* Mobile Slide-up Overlay Container */}
-        <div className="pd-details-overlay">\n          <div className="pd-info-col">
+        {/* Mobile Slide-up Overlay Container */}
+        <div className="pd-details-overlay">
+          
+          <div className="pd-info-col">
             <h1 className="pd-title">{product.name}</h1>
             <div className="pd-rating-summary">
               <div className="pd-stars">
@@ -267,10 +270,57 @@ const ProductDetail = () => {
                 <button className="pd-sizes-link" onClick={() => setActiveTab('sizes')}>O'lchamlar haqida batafsil</button>
               </div>
             )}
+          </div>
+
+          <div className="pd-right-col">
+            <div className="pd-order-card">
+              {/* Desktop Action block (Mobile uses fixed bottom bar) */}
+              <div className="pd-price-row-desktop">
+                <span className="pd-current-price-large">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
+                {numericOldPrice > 0 && <span className="pd-old-price-large" style={{marginLeft: 8}}>{formatMoney(numericOldPrice)}</span>}
+              </div>
+
+              <div className="pd-action-row">
+                <button className="pd-one-click-btn">1 klikda xarid qilish</button>
+                <button
+                  className={`pd-fav-btn ${isFavorite(product.id) ? 'active' : ''}`}
+                  onClick={() => toggleFavorite(product)}
+                >
+                  <Heart size={20} fill={isFavorite(product.id) ? '#ef4444' : 'none'} color={isFavorite(product.id) ? '#ef4444' : '#94a3b8'} />
+                </button>
+              </div>
+
+              {cartItem ? (
+                <div className="pd-cart-qty-controls">
+                  <button className="pd-qty-btn" onClick={() => { if (cartItem.quantity > 1) { updateQuantity(cartItemId, -1); } else { removeFromCart(cartItemId); } }}>
+                    <Minus size={16} />
+                  </button>
+                  <span className="pd-qty-display">{cartItem.quantity}</span>
+                  <button className="pd-qty-btn" disabled={cartItem.quantity >= maxStock} onClick={() => updateQuantity(cartItemId, 1)}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button className="pd-buy-btn" onClick={handleAddToCart}>
+                  <div className="pd-buy-btn-main">Savatga qo'shish</div>
+                  <div className="pd-buy-btn-sub">Ertaga yetkazib beramiz</div>
+                </button>
+              )}
+              
+              <div className="pd-stock-row" style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px'}}>
+                <CheckCircle size={16} color="#16a34a" />
+                <span style={{fontSize: 14}}>Ko'p miqdorda mavjud</span>
+              </div>
+
+              <div className="pd-in-carts-row" style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: 14, color: '#64748b'}}>
+                <ShoppingBag size={16} color="#8b5cf6" />
+                <span>{(numericPrice % 200) + 50} kishining savatida</span>
+              </div>
+            </div>
 
             {/* Uzum-style Info Cards */}
             <div className="uzum-info-cards">
-               {/* Price Card */}
+               {/* Price Card (Mobile Only) */}
                <div className="uzum-info-card pd-price-card">
                   <div className="pd-price-row-large">
                      <span className="pd-current-price-large">{numericPrice ? formatMoney(numericPrice) : product.price}</span>
@@ -308,42 +358,7 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          <div className="pd-order-card">
-            {/* Desktop Action block (Mobile uses fixed bottom bar) */}
-            <div className="pd-action-row">
-              <button className="pd-one-click-btn">1 klikda xarid qilish</button>
-              <button
-                className={`pd-fav-btn ${isFavorite(product.id) ? 'active' : ''}`}
-                onClick={() => toggleFavorite(product)}
-              >
-                <Heart size={20} fill={isFavorite(product.id) ? '#ef4444' : 'none'} color={isFavorite(product.id) ? '#ef4444' : '#94a3b8'} />
-              </button>
-            </div>
-
-            {cartItem ? (
-              <div className="pd-cart-qty-controls">
-                <button className="pd-qty-btn" onClick={() => { if (cartItem.quantity > 1) { updateQuantity(cartItemId, -1); } else { removeFromCart(cartItemId); } }}>
-                  <Minus size={16} />
-                </button>
-                <span className="pd-qty-display">{cartItem.quantity}</span>
-                <button className="pd-qty-btn" disabled={cartItem.quantity >= maxStock} onClick={() => updateQuantity(cartItemId, 1)}>
-                  <Plus size={16} />
-                </button>
-              </div>
-            ) : (
-              <button className="pd-buy-btn" onClick={handleAddToCart}>
-                <div className="pd-buy-btn-main">Savatga qo'shish</div>
-                <div className="pd-buy-btn-sub">Ertaga yetkazib beramiz</div>
-              </button>
-            )}
-
-            <div className="pd-in-carts-row">
-              <ShoppingBag size={16} color="#8b5cf6" />
-              <span>{(numericPrice % 200) + 50} kishining savatida</span>
-            </div>
-          </div>
-
-          {/* Info Tabs Section */}
+          {/* Info Tabs Section */}\n\n          {/* Info Tabs Section */}
           <div className="uzum-tabs-section">
             <div className="uzum-tabs-header">
               <button className={`uzum-tab-btn ${activeTab === 'description' ? 'active' : ''}`} onClick={() => setActiveTab('description')}>Mahsulot tavsifi</button>
