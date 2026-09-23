@@ -256,6 +256,16 @@ const ProductDetail = () => {
                   )}
                 </div>
                 <button className="pd-sizes-link" onClick={() => setActiveTab('sizes')}>O'lchamlar haqida batafsil</button>
+                <div className="pd-stock-info mobile-only" style={{marginTop: '16px'}}>
+                  <div className="pd-stock-row" style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                    <CheckCircle size={16} color="#16a34a" />
+                    <span style={{fontSize: 14}}>Ko'p miqdorda mavjud</span>
+                  </div>
+                  <div className="pd-in-carts-row" style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: 14, color: '#64748b'}}>
+                    <ShoppingBag size={16} color="#8b5cf6" />
+                    <span>{(numericPrice % 200) + 50} kishining savatida</span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -295,14 +305,16 @@ const ProductDetail = () => {
                 </button>
               )}
               
-              <div className="pd-stock-row" style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px'}}>
-                <CheckCircle size={16} color="#16a34a" />
-                <span style={{fontSize: 14}}>Ko'p miqdorda mavjud</span>
-              </div>
+              <div className="pd-stock-info desktop-only">
+                <div className="pd-stock-row" style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px'}}>
+                  <CheckCircle size={16} color="#16a34a" />
+                  <span style={{fontSize: 14}}>Ko'p miqdorda mavjud</span>
+                </div>
 
-              <div className="pd-in-carts-row" style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: 14, color: '#64748b'}}>
-                <ShoppingBag size={16} color="#8b5cf6" />
-                <span>{(numericPrice % 200) + 50} kishining savatida</span>
+                <div className="pd-in-carts-row" style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: 14, color: '#64748b'}}>
+                  <ShoppingBag size={16} color="#8b5cf6" />
+                  <span>{(numericPrice % 200) + 50} kishining savatida</span>
+                </div>
               </div>
             </div>
 
