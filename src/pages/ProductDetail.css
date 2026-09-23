@@ -709,10 +709,10 @@
 
 @media (min-width: 769px) {
   .pd-top {
-    grid-template-columns: 72px 500px 400px 400px !important;
-    gap: 40px !important;
-    justify-content: start !important;
-    width: auto !important;
+    grid-template-columns: 72px 1.3fr 1fr 1fr !important;
+    gap: 32px !important;
+    width: 100% !important;
+    max-width: 1400px;
   }
   .pd-order-card {
     background: #ffffff !important;
