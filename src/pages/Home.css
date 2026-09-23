@@ -167,12 +167,14 @@
 }
 
 .slide {
-  flex: 0 0 1000px;
+  flex: 0 0 calc(100% - 30%);
   height: 100%;
   scroll-snap-align: start;
   border-radius: 20px;
   overflow: hidden;
   position: relative;
+  z-index: 2;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
 }
 
 .slide img {
