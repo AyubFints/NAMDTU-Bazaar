@@ -167,7 +167,7 @@
 }
 
 .slide {
-  flex: 0 0 min(100%, 1000px);
+  flex: 0 0 1000px;
   height: 100%;
   scroll-snap-align: start;
   border-radius: 20px;
@@ -192,7 +192,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 80px;
+  padding: 0 60px;
   color: white;
   z-index: 5;
 }
