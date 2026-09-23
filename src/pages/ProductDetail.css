@@ -30,7 +30,7 @@
 @media (min-width: 769px) {
   .pd-top {
     display: grid;
-    grid-template-columns: 72px 420px 1fr 400px;
+    grid-template-columns: 72px 420px 1fr 480px;
     gap: 24px;
     margin-bottom: 40px;
     align-items: flex-start;
