@@ -30,7 +30,7 @@
 @media (min-width: 769px) {
   .pd-top {
     display: grid;
-    grid-template-columns: 72px 420px 1fr 350px;
+    grid-template-columns: 72px 420px 1fr 400px;
     gap: 24px;
     margin-bottom: 40px;
     align-items: flex-start;
@@ -324,7 +324,7 @@
   transition: all 0.2s;
 }
 .pd-size-btn.active {
-  border-color: #7000ff;
+  border-color: rgb(10, 16, 82);
   color: #7000ff;
   background: rgba(112,0,255,0.05);
 }
@@ -391,7 +391,7 @@
   font-weight: 800;
   color: #fff;
 }
-.p-uzum { background: #7000ff; }
+.p-uzum { background: rgb(10, 16, 82); }
 .p-humo { background: #f59e0b; color: #fff;}
 .p-uzcard { background: #3b82f6; }
 .p-visa { background: #1d4ed8; }
@@ -434,7 +434,7 @@
 
 .pd-buy-btn {
   width: 100%;
-  background: #7000ff;
+  background: rgb(10, 16, 82);
   color: white;
   border: none;
   border-radius: 16px;
@@ -447,7 +447,7 @@
   margin-bottom: 16px;
 }
 .pd-buy-btn:hover {
-  background: #5b00cc;
+  background: rgb(15, 25, 110);
 }
 .pd-buy-btn-main {
   font-size: 16px;
@@ -493,7 +493,7 @@
   }
   .pd-mobile-buy-btn {
     flex: 1;
-    background: #7000ff;
+    background: rgb(10, 16, 82);
     color: white;
     border: none;
     border-radius: 12px;
@@ -644,7 +644,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: #7000ff;
+  background: rgb(10, 16, 82);
 }
 .uzum-tab-content {
   color: #334155;

@@ -123,10 +123,7 @@ const ProductDetail = () => {
             <img src={productImages[0]} alt={product.name} />
             <div className="pd-sticky-info">
               <h4 title={product.name}>{product.name}</h4>
-              <div className="pd-sticky-rating">
-                <Star size={12} fill="#f59e0b" color="#f59e0b" />
-                <span>{avgRating} (3 sharh) • {product.orders || 9} buyurtma</span>
-              </div>
+              
             </div>
           </div>
           
@@ -230,16 +227,7 @@ const ProductDetail = () => {
           
           <div className="pd-info-col">
             <h1 className="pd-title">{product.name}</h1>
-            <div className="pd-rating-summary">
-              <div className="pd-stars">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
-                ))}
-              </div>
-              <span className="pd-rating-count">5.0 (3 sharh)</span>
-              <span className="pd-dot">·</span>
-              <span className="pd-rating-count">10+ buyurtma</span>
-            </div>
+            
 
             {product.sizes && product.sizes.length > 0 && (
               <div className="pd-sizes-section">
