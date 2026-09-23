@@ -162,9 +162,23 @@ const ProductDetail = () => {
       </button>
 
       {/* Main layout */}
+            {/* Main layout */}
       <div className="pd-top">
         
-        {/* Col: Main image & Desktop thumbs below */}
+        {/* Col 1: Vertical thumbs (Desktop) */}
+        <div className="pd-thumbs-col">
+          {productImages.map((img, idx) => (
+            <div
+              key={idx}
+              className={`pd-thumb ${idx === activeImage ? 'active' : ''}`}
+              onClick={() => setActiveImage(idx)}
+            >
+              <img src={img} alt="" />
+            </div>
+          ))}
+        </div>
+
+        {/* Col 2: Main image */}
         <div className="pd-image-col">
           <div className="pd-mobile-sticky-wrapper">
              <div className="pd-main-image-container">
@@ -208,30 +222,10 @@ const ProductDetail = () => {
                 </div>
              </div>
           </div>
-
-          {/* Desktop Thumbnails (Below image) */}
-          <div className="pd-desktop-thumbs">
-            {visibleThumbs.map((img, idx) => (
-              <div
-                key={idx}
-                className={`pd-thumb ${idx === activeImage ? 'active' : ''}`}
-                onClick={() => setActiveImage(idx)}
-              >
-                <img src={img} alt="" />
-              </div>
-            ))}
-            {!showMoreThumbs && hiddenThumbsCount > 0 && (
-               <div className="pd-thumb pd-more-thumb" onClick={() => setShowMoreThumbs(true)}>
-                  <span>+ {hiddenThumbsCount} Yana</span>
-               </div>
-            )}
-          </div>
         </div>
 
         {/* Mobile Slide-up Overlay Container */}
-        <div className="pd-details-overlay">
-          
-          <div className="pd-info-col">
+        <div className="pd-details-overlay">\n          <div className="pd-info-col">
             <h1 className="pd-title">{product.name}</h1>
             <div className="pd-rating-summary">
               <div className="pd-stars">
