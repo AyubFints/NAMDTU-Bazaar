@@ -158,7 +158,7 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  gap: 16px;
+  gap: 2px;
   padding: 0;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .slide {
-  flex: 0 0 100%;
+  flex: 0 0 min(100%, 1000px);
   height: 100%;
   scroll-snap-align: start;
   border-radius: 20px;
