@@ -93,7 +93,13 @@ const Navbar = () => {
           {user ? (
             <div className="user-profile-wrapper">
               <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="nav-link user-profile-link">
-                <User size={22} />
+                {user.role === 'admin' ? (
+                  <div className="avatar-circle">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <User size={22} />
+                )}
                 <span>{user.role === 'admin' ? user.name : 'Profil'}</span>
               </Link>
             </div>
