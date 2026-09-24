@@ -56,7 +56,7 @@ const Home = () => {
   const sliderRef = useRef(null);
   
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
+  const { cart, addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
   const navigate = useNavigate();
 
   // Load admin products and banners from backend
