@@ -11,7 +11,7 @@
 
 /* SIDEBAR */
 .up-sidebar {
-  width: 500px;
+  width: 300px;
   flex-shrink: 0;
 }
 
@@ -144,13 +144,14 @@
 .up-empty-state {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 100px 20px;
+  padding: 90px 20px;
   text-align: center;
-  min-height: 450px;
+  min-height: 440px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  max-width: 600px;
   background: #ffffff;
 }
 
