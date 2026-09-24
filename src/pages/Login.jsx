@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { X } from 'lucide-react';
 import './Auth.css';
 
 const Login = () => {
-  const [name, setName] = useState('');
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  
+  // Admin fields
+  const [adminName, setAdminName] = useState('');
+  const [adminPhone, setAdminPhone] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
-  const handlePhoneChange = (e) => {
+  const handlePhoneChange = (e, setter) => {
     let val = e.target.value.replace(/\D/g, '');
     if (val.length > 9) val = val.substring(0, 9);
     
@@ -20,81 +26,140 @@ const Login = () => {
     if (val.length > 5) formatted += ' ' + val.substring(5, 7);
     if (val.length > 7) formatted += ' ' + val.substring(7, 9);
     
-    setPhone(formatted);
+    setter(formatted);
   };
 
-  const handleSubmit = async (e) => {
+  const handleUserLogin = async (e) => {
     e.preventDefault();
-    const result = await login(phone, password);
+    const cleanPhone = phone.replace(/\s/g, '');
+    if (cleanPhone.length < 9) {
+      alert("Iltimos, telefon raqamni to'liq kiriting!");
+      return;
+    }
+
+    // Try to login with fixed password
+    const result = await login(cleanPhone, 'User123!');
     if (result.success) {
-      // the role is updated in the context, but we can't await context state update immediately
-      // so we use a small timeout or wait for the user state, but actually navigate('/') works
-      // for both if we handle admin redirect in App.js or Home.js. Let's just navigate to '/'
-      // and let the Navbar handle UI. But if we need to force admin panel:
       navigate('/');
     } else {
-      alert(result.message);
+      // If login fails, they probably don't have an account, so register them
+      const regResult = await register('Foydalanuvchi', cleanPhone, 'User123!', 'user');
+      if (regResult.success) {
+        navigate('/');
+      } else {
+        alert("Xatolik yuz berdi: " + regResult.message);
+      }
+    }
+  };
+
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    const cleanPhone = adminPhone.replace(/\s/g, '');
+    if (cleanPhone.length < 9) {
+      alert("Telefon raqamni to'liq kiriting!");
+      return;
+    }
+    
+    const result = await login(cleanPhone, adminPassword);
+    if (result.success) {
+      navigate('/');
+    } else {
+      alert("Xatolik yuz berdi: " + result.message);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card card">
-        <div className="auth-header">
-          <h2>Tizimga kirish</h2>
-          <p>O'z profilingizga kiring</p>
-        </div>
-        
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Ism</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Ismingizni kiriting" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required 
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Telefon raqam</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Masalan: 91 234 56 78" 
-              value={phone}
-              onChange={handlePhoneChange}
-              required 
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Parol</label>
-            <input 
-              type="password" 
-              className="form-control" 
-              placeholder="Parolingizni kiriting" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required 
-            />
-          </div>
-          
-          <div className="auth-options">
-            <label className="remember-me">
-              <input type="checkbox" /> Eslab qolish
-            </label>
-            <a href="#" className="forgot-password">Parolni unutdingizmi?</a>
-          </div>
-          
-          <button type="submit" className="btn btn-primary auth-btn">Tizimga kirish</button>
-        </form>
-        
-        <div className="auth-footer">
-          Akkauntingiz yo'qmi? <Link to="/register">Ro'yxatdan o'tish</Link>
-        </div>
+    <div className="auth-overlay">
+      <div className="auth-modal">
+        <button className="auth-close-btn" onClick={() => navigate('/')}>
+          <X size={20} />
+        </button>
+
+        {!isAdminMode ? (
+          <>
+            <div className="auth-modal-header">
+              <div className="auth-logo">NAMDTU Bazaar</div>
+              <h2>NAMDTU Bazaar'ga kirish</h2>
+            </div>
+            
+            <form className="auth-modal-form" onSubmit={handleUserLogin}>
+              <div className="uzum-phone-input">
+                <span className="uzum-prefix">+998</span>
+                <input 
+                  type="text" 
+                  placeholder="00 000-00-00" 
+                  value={phone}
+                  onChange={(e) => handlePhoneChange(e, setPhone)}
+                  autoFocus
+                />
+              </div>
+
+              <button type="submit" className="uzum-primary-btn">
+                Kirish
+              </button>
+
+              <div className="auth-terms">
+                Davom etgan holda men 
+                <a href="#"> shaxsiy ma'lumotlarni qayta ishlash siyosatiga rozilik bildirasiz</a> va 
+                <a href="#"> ommaviy oferta bilan rozi bo'laman</a>
+              </div>
+
+              <button type="button" className="auth-switch-mode-btn" onClick={() => setIsAdminMode(true)}>
+                Tizimga kirish
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <div className="auth-modal-header">
+              <div className="auth-logo">NAMDTU Bazaar Admin</div>
+              <h2>Tizimga kirish</h2>
+            </div>
+            
+            <form className="auth-modal-form" onSubmit={handleAdminLogin}>
+              <div className="admin-form-group">
+                <input 
+                  type="text" 
+                  placeholder="Ismingiz (Masalan: Admin)" 
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  className="admin-input"
+                  required
+                />
+              </div>
+
+              <div className="admin-form-group uzum-phone-input">
+                <span className="uzum-prefix">+998</span>
+                <input 
+                  type="text" 
+                  placeholder="91 000 00 00" 
+                  value={adminPhone}
+                  onChange={(e) => handlePhoneChange(e, setAdminPhone)}
+                  required
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <input 
+                  type="password" 
+                  placeholder="Parol (Masalan: Admin001)" 
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="admin-input"
+                  required
+                />
+              </div>
+
+              <button type="submit" className="uzum-primary-btn">
+                Tizimga kirish
+              </button>
+
+              <button type="button" className="auth-switch-mode-btn" onClick={() => setIsAdminMode(false)}>
+                Orqaga qaytish
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
