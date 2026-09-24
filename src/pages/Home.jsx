@@ -351,7 +351,8 @@ const Home = () => {
                         className="btn full-width-btn" 
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          const size = (product.sizes && product.sizes.length > 0) ? product.sizes[0] : null;
+                          const sizeObj = (product.sizes && product.sizes.length > 0) ? product.sizes[0] : null;
+                          const size = sizeObj ? (typeof sizeObj === "object" ? sizeObj.size : sizeObj) : null;
                           const cartItemId = size ? `${product.id}-${size}` : product.id;
                           addToCart({ ...product, id: cartItemId, originalId: product.id, size });
                         }}

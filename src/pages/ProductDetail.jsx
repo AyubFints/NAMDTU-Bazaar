@@ -36,7 +36,7 @@ const ProductDetail = () => {
         const found = data.find(p => p.id === numId);
         setProduct(found || null);
         if (found && found.sizes && found.sizes.length > 0) {
-          setSelectedSize(found.sizes[0]);
+          setSelectedSize(typeof found.sizes[0] === "object" ? found.sizes[0].size : found.sizes[0]);
         }
       } catch (error) {
         console.error("Failed to load products", error);
