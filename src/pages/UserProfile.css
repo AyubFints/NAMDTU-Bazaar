@@ -129,12 +129,7 @@
 }
 
 .up-tab.active {
-  color: #111827;
-  font-weight: 600;
-}
-
-.up-tab.active-pill {
-  background: #1f2937;
+  background: rgb(10, 16, 82);
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -142,7 +137,7 @@
 }
 
 .up-empty-state {
-  border: 1px solid #e5e7eb;
+  border: 2px dashed #cbd5e1;
   border-radius: 12px;
   padding: 40px 20px;
   text-align: center;

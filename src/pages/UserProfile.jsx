@@ -83,7 +83,7 @@ const UserProfile = () => {
             To'lov qilinmagan
           </button>
           <button 
-            className={`up-tab ${activeTab === 'Faol' ? 'active-pill' : ''}`}
+            className={`up-tab ${activeTab === 'Faol' ? 'active' : ''}`}
             onClick={() => setActiveTab('Faol')}
           >
             Faol
