@@ -13,7 +13,7 @@ const Login = () => {
   const [adminPhone, setAdminPhone] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   
-  const { login, register } = useAuth();
+  const { login, register, closeLoginModal } = useAuth();
   const navigate = useNavigate();
 
   const handlePhoneChange = (e, setter) => {
