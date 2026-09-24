@@ -7,11 +7,28 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : [];
+    try { const parsed = JSON.parse(saved); return Array.isArray(parsed) ? parsed : []; } catch(e) { return []; }
   });
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    try {
+      // Create a lightweight version of the cart for localStorage
+      const cartToSave = cart.map(item => {
+        // Exclude huge base64 fields (images, description) to prevent QuotaExceededError
+        const { images, image, description, ...rest } = item;
+        return rest;
+      });
+      localStorage.setItem('cart', JSON.stringify(cartToSave));
+    } catch (e) {
+      console.error('Failed to save cart to localStorage:', e);
+      // Fallback: just store IDs and quantities if it STILL exceeds
+      try {
+        const minimalCart = cart.map(item => ({ id: item.id, quantity: item.quantity, selected: item.selected }));
+        localStorage.setItem('cart', JSON.stringify(minimalCart));
+      } catch (e2) {
+        console.error('Even minimal cart failed to save:', e2);
+      }
+    }
   }, [cart]);
 
   const addToCart = (product) => {
