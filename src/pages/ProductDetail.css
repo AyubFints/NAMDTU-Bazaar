@@ -196,8 +196,8 @@
   
   .pd-mobile-sticky-wrapper {
     height: 100%;
-    width: 100%;
-  }
+    width: 140px;
+}
   .pd-main-image-container {
     height: 100%;
     width: 100%;
@@ -407,7 +407,7 @@
   margin-bottom: 20px;
 }
 .pd-one-click-btn {
-  flex: 1;
+  flex: 0 0 auto;
   background: #f1f5f9;
   color: #0f172a;
   border: none;
@@ -495,7 +495,7 @@
     text-decoration: line-through;
   }
   .pd-mobile-buy-btn {
-    flex: 1;
+    flex: 0 0 auto;
     background: rgb(10, 16, 82);
     color: white;
     border: none;
@@ -506,7 +506,7 @@
     cursor: pointer;
   }
   .pd-cart-qty-controls {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -559,7 +559,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 1;
+  flex: 0 0 auto;
 }
 .pd-sticky-left img {
   width: 48px;
@@ -776,7 +776,7 @@
 
 /* Beautified Qty Controls */
 .pd-cart-qty-controls {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -139,7 +139,7 @@ const ProductDetail = () => {
                   <Minus size={16} />
                 </button>
                 <span className="pd-qty-display">{cartItem.quantity}</span>
-                <button className="pd-qty-btn" onClick={(e) => { e.stopPropagation(); updateQuantity(cartItemId, 1); }} disabled={cartItem.quantity >= maxStock}>
+                <button className="pd-qty-btn" onClick={(e) => { e.stopPropagation(); updateQuantity(cartItemId, 1); }} disabled={cartItem.quantity >= (typeof maxStock !== \'undefined\' ? maxStock : 999)}>
                   <Plus size={16} />
                 </button>
               </div>
@@ -294,7 +294,7 @@ const ProductDetail = () => {
                     <Minus size={16} />
                   </button>
                   <span className="pd-qty-display">{cartItem.quantity}</span>
-                  <button className="pd-qty-btn" disabled={cartItem.quantity >= maxStock} onClick={() => updateQuantity(cartItemId, 1)}>
+                  <button className="pd-qty-btn" disabled={cartItem.quantity >= (typeof maxStock !== \'undefined\' ? maxStock : 999)} onClick={() => updateQuantity(cartItemId, 1)}>
                     <Plus size={16} />
                   </button>
                 </div>
