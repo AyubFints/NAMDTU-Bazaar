@@ -114,9 +114,7 @@ const AdminPanel = () => {
 
 
 
-  useEffect(() => {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders]);
+  
 
   useEffect(() => {
     localStorage.setItem('hero_banners', JSON.stringify(banners));
