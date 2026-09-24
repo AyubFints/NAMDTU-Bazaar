@@ -14,10 +14,10 @@
 
 .auth-modal {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   background: #fff;
   border-radius: 20px;
-  padding: 32px 24px;
+  padding: 40px 32px;
   position: relative;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   animation: modalFadeIn 0.3s ease;
