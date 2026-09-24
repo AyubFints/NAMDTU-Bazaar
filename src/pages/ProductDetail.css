@@ -196,8 +196,8 @@
   
   .pd-mobile-sticky-wrapper {
     height: 100%;
-    width: 140px;
-}
+    width: 100%;
+  }
   .pd-main-image-container {
     height: 100%;
     width: 100%;
