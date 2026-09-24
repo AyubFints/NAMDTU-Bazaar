@@ -12,7 +12,7 @@ const Navbar = () => {
   const [mobileLangOpen, setMobileLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { lang, setLang, t } = useLanguage();
-  const { user } = useAuth();
+  const { user, openLoginModal } = useAuth();
   const { favorites } = useFavorites();
   const { getCartCount } = useCart();
   const menuRef = useRef(null);
