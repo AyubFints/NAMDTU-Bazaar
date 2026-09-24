@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
@@ -8,6 +9,7 @@ import './Cart.css';
 const Cart = () => {
   const { cart, updateQuantity, removeFromCart, toggleSelect, selectAll, removeSelected, clearCart } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -197,10 +199,10 @@ const Cart = () => {
                     <div className={`custom-checkbox ${item.selected ? 'checked' : ''}`} onClick={() => toggleSelect(item.id)}>
                       {item.selected && <Check size={14} color="#fff" strokeWidth={3} />}
                     </div>
-                    <div className="cart-item-img">
+                    <div className="cart-item-img" onClick={() => navigate(`/product/${item.originalId || item.id}`)} style={{cursor: "pointer"}}>
                       <img src={productImg} alt={item.name} />
                     </div>
-                    <div className="cart-item-info">
+                    <div className="cart-item-info" onClick={() => navigate(`/product/${item.originalId || item.id}`)} style={{cursor: "pointer"}}>
                       <h3 className="cart-item-title">
                         {item.name}
                         {item.size && <span className="cart-item-size-badge"> (Razmer: {item.size})</span>}
