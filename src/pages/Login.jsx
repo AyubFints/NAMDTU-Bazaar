@@ -40,12 +40,12 @@ const Login = () => {
     // Try to login with fixed password
     const result = await login(cleanPhone, 'User123!');
     if (result.success) {
-      navigate('/');
+      closeLoginModal();
     } else {
       // If login fails, they probably don't have an account, so register them
       const regResult = await register('Foydalanuvchi', cleanPhone, 'User123!', 'user');
       if (regResult.success) {
-        navigate('/');
+        closeLoginModal();
       } else {
         alert("Xatolik yuz berdi: " + regResult.message);
       }
@@ -62,7 +62,7 @@ const Login = () => {
     
     const result = await login(cleanPhone, adminPassword);
     if (result.success) {
-      navigate('/');
+      closeLoginModal();
     } else {
       alert("Xatolik yuz berdi: " + result.message);
     }
@@ -71,7 +71,7 @@ const Login = () => {
   return (
     <div className="auth-overlay">
       <div className="auth-modal">
-        <button className="auth-close-btn" onClick={() => navigate('/')}>
+        <button className="auth-close-btn" onClick={closeLoginModal}>
           <X size={20} />
         </button>
 

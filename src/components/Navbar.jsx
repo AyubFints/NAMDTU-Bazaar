@@ -100,10 +100,10 @@ const Navbar = () => {
               </Link>
             </div>
           ) : (
-            <Link to="/register" className="nav-link">
+            <button className="nav-link login-btn-nav" onClick={openLoginModal} style={{background:"transparent", border:"none", cursor:"pointer", color:"#0f172a"}}>
               <User size={22} />
               <span>{t('login')}</span>
-            </Link>
+            </button>
           )}
           <Link to="/favorites" className="nav-link">
             <div style={{position: 'relative', display: 'inline-flex'}}>
@@ -179,10 +179,10 @@ const Navbar = () => {
                 <span>{user.name}</span>
               </Link>
             ) : (
-              <Link to="/register" className="mobile-link" onClick={() => setMenuOpen(false)}>
+              <button className="mobile-link login-btn-nav" onClick={() => {setMenuOpen(false); openLoginModal();}} style={{background:"transparent", border:"none", width:"100%", textAlign:"left", cursor:"pointer"}}>
                 <User size={20} />
                 <span>{t('login')}</span>
-              </Link>
+              </button>
             )}
             <Link to="/favorites" className="mobile-link" onClick={() => setMenuOpen(false)}>
               <Heart size={20} />
