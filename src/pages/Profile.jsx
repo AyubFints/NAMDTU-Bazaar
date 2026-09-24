@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogOut, User, Heart, ShoppingBag, Plus, Package, Image, X, Trash2 } from 'lucide-react';
 import './Profile.css';
+import UserProfile from './UserProfile';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -129,6 +130,10 @@ const Profile = () => {
   const formatPrice = (price) => {
     return Number(price).toLocaleString('uz-UZ') + " so'm";
   };
+
+  if (user.role === 'user') {
+    return <UserProfile />;
+  }
 
   return (
     <div className="profile-dashboard">
