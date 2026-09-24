@@ -182,7 +182,7 @@ const ProductDetail = () => {
         <div className="pd-image-col">
           <div className="pd-mobile-sticky-wrapper">
              <div className="pd-main-image-container">
-                <div className="pd-main-image" onTouchStart={(e) => {
+                <div className="pd-main-image" style={{ overflow: 'hidden' }} onTouchStart={(e) => {
                      const startX = e.touches[0].clientX;
                      const handleTouchEnd = (te) => {
                          const endX = te.changedTouches[0].clientX;
@@ -195,7 +195,19 @@ const ProductDetail = () => {
                      };
                      document.addEventListener('touchend', handleTouchEnd);
                 }}>
-                  <img src={productImages[activeImage]} alt={product.name} />
+                  <div style={{
+                    display: 'flex',
+                    height: '100%',
+                    width: '100%',
+                    transition: 'transform 0.4s ease-in-out',
+                    transform: `translateX(-${activeImage * 100}%)`
+                  }}>
+                    {productImages.map((img, idx) => (
+                      <div key={idx} style={{ flex: '0 0 100%', height: '100%' }}>
+                        <img src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    ))}
+                  </div>
                   
                   {/* Desktop arrows */}
                   {productImages.length > 1 && (
