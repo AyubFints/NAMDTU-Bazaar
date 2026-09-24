@@ -320,7 +320,7 @@ const Home = () => {
                   </div>
                   
                   {(() => {
-                    const cartItem = getCartItem(product.id);
+                    const cartItem = cart.find(item => item.id === product.id || item.originalId === product.id);
                     if (cartItem) {
                       return (
                         <div className="cart-qty-controls" onClick={(e) => e.stopPropagation()}>
@@ -328,9 +328,9 @@ const Home = () => {
                             className="qty-btn"
                             onClick={() => {
                               if (cartItem.quantity > 1) {
-                                updateQuantity(product.id, -1);
+                                updateQuantity(cartItem.id, -1);
                               } else {
-                                removeFromCart(product.id);
+                                removeFromCart(cartItem.id);
                               }
                             }}
                           >
@@ -339,7 +339,7 @@ const Home = () => {
                           <span className="qty-display">{cartItem.quantity}</span>
                           <button 
                             className="qty-btn"
-                            onClick={() => updateQuantity(product.id, 1)}
+                            onClick={() => updateQuantity(cartItem.id, 1)}
                           >
                             <Plus size={16} />
                           </button>
@@ -351,7 +351,9 @@ const Home = () => {
                         className="btn full-width-btn" 
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          addToCart(product); 
+                          const size = (product.sizes && product.sizes.length > 0) ? product.sizes[0] : null;
+                          const cartItemId = size ? `${product.id}-${size}` : product.id;
+                          addToCart({ ...product, id: cartItemId, originalId: product.id, size });
                         }}
                       >
                         <ShoppingBag size={18} />

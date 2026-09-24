@@ -35,6 +35,9 @@ const ProductDetail = () => {
         const numId = Number(id);
         const found = data.find(p => p.id === numId);
         setProduct(found || null);
+        if (found && found.sizes && found.sizes.length > 0) {
+          setSelectedSize(found.sizes[0]);
+        }
       } catch (error) {
         console.error("Failed to load products", error);
       } finally {
