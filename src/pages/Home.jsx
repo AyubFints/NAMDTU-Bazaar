@@ -150,42 +150,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      {activeCategory === 'all' && (
-        <section className="hero-slider-section">
-          <div className="slider-container">
-            <button className="slider-arrow left" onClick={prevSlide}>
-              <ChevronLeft size={28} />
-            </button>
-            
-            <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
-              {banners.map(slide => (
-                <div className="slide" key={slide.id}>
-                  <img src={slide.image} alt={slide.title || "Banner"} />
-                </div>
-              ))}
-            </div>
-
-            <button className="slider-arrow right" onClick={nextSlide}>
-              <ChevronRight size={28} />
-            </button>
-
-            <div className="slider-dots">
-              {banners.map((_, idx) => (
-                <span 
-                  key={idx} 
-                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
-                  onClick={() => {
-                    if (sliderRef.current) {
-                      const slideWidth = getSlideWidth();
-                      sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
-                    }
-                  }}
-                ></span>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      
 
       <div className="categories-bar">
         {/* Mobile: Shows only the currently selected category */}
@@ -230,7 +195,44 @@ const Home = () => {
         ))}
       </div>
 
-      {activeCategory !== 'all' && SUBCATEGORIES_MAP[activeCategory] && (
+      
+
+      {activeCategory === 'all' && (
+        <section className="hero-slider-section">
+          <div className="slider-container">
+            <button className="slider-arrow left" onClick={prevSlide}>
+              <ChevronLeft size={28} />
+            </button>
+            
+            <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
+              {banners.map(slide => (
+                <div className="slide" key={slide.id}>
+                  <img src={slide.image} alt={slide.title || "Banner"} />
+                </div>
+              ))}
+            </div>
+
+            <button className="slider-arrow right" onClick={nextSlide}>
+              <ChevronRight size={28} />
+            </button>
+
+            <div className="slider-dots">
+              {banners.map((_, idx) => (
+                <span 
+                  key={idx} 
+                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
+                  onClick={() => {
+                    if (sliderRef.current) {
+                      const slideWidth = getSlideWidth();
+                      sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
+                    }
+                  }}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}{activeCategory !== 'all' && SUBCATEGORIES_MAP[activeCategory] && (
         <div className="visual-categories-bar">
           {SUBCATEGORIES_MAP[activeCategory].map(sub => (
             <div 
