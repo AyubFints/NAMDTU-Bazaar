@@ -93,10 +93,8 @@ const Navbar = () => {
           {user ? (
             <div className="user-profile-wrapper">
               <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="nav-link user-profile-link">
-                <div className="avatar-circle">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span>{user.name}</span>
+                <User size={22} />
+                <span>{user.role === 'admin' ? user.name : 'Profil'}</span>
               </Link>
             </div>
           ) : (
@@ -173,10 +171,8 @@ const Navbar = () => {
             
             {user ? (
               <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="mobile-link" onClick={() => setMenuOpen(false)}>
-                <div className="avatar-circle">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span>{user.name}</span>
+                <User size={22} />
+                <span>{user.role === 'admin' ? user.name : 'Profil'}</span>
               </Link>
             ) : (
               <button className="mobile-link login-btn-nav" onClick={() => {setMenuOpen(false); openLoginModal();}} style={{background:"transparent", border:"none", width:"100%", textAlign:"left", cursor:"pointer", color:"#fff"}}>
