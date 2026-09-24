@@ -2,9 +2,9 @@
 .user-profile-layout {
   display: flex;
   gap: 32px;
-  max-width: 100%;
+  width: 100%;
   margin: 40px 0;
-  padding: 0 32px;
+  padding: 0;
   font-family: 'Inter', sans-serif;
   color: #111827;
 }
