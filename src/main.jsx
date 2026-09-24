@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import ErrorBoundary from './ErrorBoundary';
 import App from './App.jsx'
 import { LanguageProvider } from './context/LanguageContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
@@ -13,7 +14,7 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <FavoritesProvider>
           <CartProvider>
-            <App />
+            <ErrorBoundary><App /></ErrorBoundary>
           </CartProvider>
         </FavoritesProvider>
       </AuthProvider>
