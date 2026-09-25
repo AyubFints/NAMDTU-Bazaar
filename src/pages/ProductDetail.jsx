@@ -373,7 +373,7 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Info Tabs Section */}\n\n          {/* Info Tabs Section */}
+          {/* Info Tabs Section */}
           <div className="uzum-tabs-section">
             <div className="uzum-tabs-header">
               <button className={`uzum-tab-btn ${activeTab === 'description' ? 'active' : ''}`} onClick={() => setActiveTab('description')}>Mahsulot tavsifi</button>
