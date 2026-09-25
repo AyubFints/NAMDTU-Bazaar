@@ -668,8 +668,8 @@
 }
 .uzum-similar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
 }
 @media (max-width: 480px) {
   .uzum-similar-grid {
@@ -835,5 +835,17 @@
 @media (max-width: 768px) {
   .pd-order-card .pd-cart-qty-controls {
     display: none !important;
+  }
+}
+
+
+@media (min-width: 769px) {
+  .uzum-tabs-section {
+    grid-column: 2 / 4;
+    margin-top: 20px;
+  }
+  .uzum-similar-section {
+    grid-column: 1 / -1;
+    margin-top: 60px;
   }
 }
