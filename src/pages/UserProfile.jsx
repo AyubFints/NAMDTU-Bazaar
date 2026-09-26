@@ -8,6 +8,7 @@ const UserProfile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('Buyurtmalarim');
+  const [activeTab, setActiveTab] = useState('Faol');
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
 
   // Auto-hide modal after 3 seconds
@@ -110,19 +111,43 @@ const UserProfile = () => {
             </button>
           </div>
         ) : (
-          <div className="up-empty-state">
-            <div style={{marginBottom: '20px', color: '#cbd5e1'}}>
-              <FileText size={64} strokeWidth={1} />
+          <>
+            {activeMenu === 'Buyurtmalarim' && (
+              <div className="up-tabs">
+                <button 
+                  className={`up-tab ${activeTab === 'Barcha buyurtmalar' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('Barcha buyurtmalar')}
+                >
+                  Barcha buyurtmalar
+                </button>
+                <button 
+                  className={`up-tab ${activeTab === "To'lov qilinmagan" ? 'active' : ''}`}
+                  onClick={() => setActiveTab("To'lov qilinmagan")}
+                >
+                  To'lov qilinmagan
+                </button>
+                <button 
+                  className={`up-tab ${activeTab === 'Faol' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('Faol')}
+                >
+                  Faol
+                </button>
+              </div>
+            )}
+            <div className="up-empty-state">
+              <div style={{marginBottom: '20px', color: '#cbd5e1'}}>
+                <FileText size={64} strokeWidth={1} />
+              </div>
+              <h2>Hozircha hech qanday ma'lumot yo'q</h2>
+              <p>
+                Siz tanlagan bo'limda hozircha ma'lumotlar mavjud emas.<br/>
+                Barcha kerakli narsalarni topish uchun qidirishdan foydalaning!
+              </p>
+              <button className="up-primary-btn" onClick={handleStartShopping}>
+                Xaridlarni boshlash
+              </button>
             </div>
-            <h2>Hozircha hech qanday ma'lumot yo'q</h2>
-            <p>
-              Siz tanlagan bo'limda hozircha ma'lumotlar mavjud emas.<br/>
-              Barcha kerakli narsalarni topish uchun qidirishdan foydalaning!
-            </p>
-            <button className="up-primary-btn" onClick={handleStartShopping}>
-              Xaridlarni boshlash
-            </button>
-          </div>
+          </>
         )}
       </main>
     </div>
