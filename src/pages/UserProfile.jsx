@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { X, ChevronRight } from 'lucide-react';
+import { X, ChevronRight, FileText } from 'lucide-react';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -111,7 +111,9 @@ const UserProfile = () => {
           </div>
         ) : (
           <div className="up-empty-state">
-            <div style={{fontSize: '48px', marginBottom: '20px'}}>📁</div>
+            <div style={{marginBottom: '20px', color: '#cbd5e1'}}>
+              <FileText size={64} strokeWidth={1} />
+            </div>
             <h2>Hozircha hech qanday ma'lumot yo'q</h2>
             <p>
               Siz tanlagan bo'limda hozircha ma'lumotlar mavjud emas.<br/>
