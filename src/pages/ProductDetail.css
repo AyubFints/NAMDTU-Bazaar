@@ -872,7 +872,7 @@
   
   .uzum-similar-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     gap: 32px !important;
   }
 }
@@ -899,7 +899,7 @@
   
   .uzum-similar-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     gap: 32px !important;
   }
 }
