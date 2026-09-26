@@ -105,6 +105,7 @@
 /* CONTENT */
 .up-content {
   flex: 1;
+  min-height: 500px;
 }
 
 .up-tabs {
@@ -137,18 +138,16 @@
 }
 
 .up-empty-state {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
+  border: none;
   padding: 40px 20px;
   text-align: center;
-  min-height: 300px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 1050px;
-  max-width: 100%;
-  background: #ffffff;
+  width: 100%;
+  background: transparent;
 }
 
 .up-empty-state h2 {
