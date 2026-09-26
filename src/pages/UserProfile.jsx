@@ -5,7 +5,7 @@ import { X, ChevronRight } from 'lucide-react';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Faol');
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
@@ -64,6 +64,9 @@ const UserProfile = () => {
           </button>
           <button className="up-nav-item">Ma'lumotlarim</button>
           <button className="up-nav-item">Ijtimoiy promokodlar</button>
+          <button className="up-nav-item" onClick={() => { logout(); navigate('/'); }} style={{color: 'red', marginTop: '20px'}}>
+            Tizimdan chiqish
+          </button>
         </nav>
       </aside>
 

@@ -41,11 +41,13 @@ const Login = () => {
     const result = await login(cleanPhone, 'User123!');
     if (result.success) {
       closeLoginModal();
+      navigate('/profile');
     } else {
       // If login fails, they probably don't have an account, so register them
       const regResult = await register('Foydalanuvchi', cleanPhone, 'User123!', 'user');
       if (regResult.success) {
         closeLoginModal();
+        navigate('/profile');
       } else {
         alert("Xatolik yuz berdi: " + regResult.message);
       }
