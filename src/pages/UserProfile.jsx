@@ -8,6 +8,7 @@ const UserProfile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Faol');
+  const [activeMenu, setActiveMenu] = useState('Buyurtmalarim');
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
 
   // Auto-hide modal after 3 seconds
@@ -58,54 +59,70 @@ const UserProfile = () => {
         </div>
 
         <nav className="up-nav">
-          <button className="up-nav-item active">Buyurtmalarim</button>
-          <button className="up-nav-item">
+          <button className={`up-nav-item ${activeMenu === 'Buyurtmalarim' ? 'active' : ''}`} onClick={() => setActiveMenu('Buyurtmalarim')}>Buyurtmalarim</button>
+          <button className={`up-nav-item ${activeMenu === 'Sharhlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Sharhlar')}>
             Sharhlar <span className="up-dot"></span>
           </button>
-          <button className="up-nav-item">Ma'lumotlarim</button>
-          <button className="up-nav-item">Ijtimoiy promokodlar</button>
-          <button className="up-nav-item" onClick={() => { logout(); navigate('/'); }} style={{color: 'red', marginTop: '20px'}}>
-            Profildan chiqish
-          </button>
+          <button className={`up-nav-item ${activeMenu === 'Ma\\'lumotlarim' ? 'active' : ''}`} onClick={() => setActiveMenu('Ma\\'lumotlarim')}>Ma'lumotlarim</button>
+          <button className={`up-nav-item ${activeMenu === 'Ijtimoiy promokodlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Ijtimoiy promokodlar')}>Ijtimoiy promokodlar</button>
         </nav>
       </aside>
 
       {/* RIGHT CONTENT */}
       <main className="up-content">
-        <div className="up-tabs">
-          <button 
-            className={`up-tab ${activeTab === 'Barcha buyurtmalar' ? 'active' : ''}`}
-            onClick={() => setActiveTab('Barcha buyurtmalar')}
-          >
-            Barcha buyurtmalar
-          </button>
-          <button 
-            className={`up-tab ${activeTab === "To'lov qilinmagan" ? 'active' : ''}`}
-            onClick={() => setActiveTab("To'lov qilinmagan")}
-          >
-            To'lov qilinmagan
-          </button>
-          <button 
-            className={`up-tab ${activeTab === 'Faol' ? 'active' : ''}`}
-            onClick={() => setActiveTab('Faol')}
-          >
-            Faol
-          </button>
-        </div>
-
-        <div className="up-empty-state">
-          <h2>Hech narsa yo'q</h2>
-          <p>
-            Sizda faol buyurtma mavjud emas!<br/>
-            Barcha kerakli narsalarni topish uchun qidirishdan<br/>foydalaning!
-          </p>
-          <button className="up-primary-btn" onClick={handleStartShopping}>
-            Xaridlarni boshlash
-          </button>
-          <button className="up-text-btn" onClick={handleStartShopping}>
-            Bosh sahifaga qaytish
-          </button>
-        </div>
+        {activeMenu === "Ma'lumotlarim" ? (
+          <div className="up-settings-form">
+            <h2>Ma'lumotlarim</h2>
+            <div className="up-form-grid">
+              <div className="up-form-group">
+                <label>Familiya *</label>
+                <input type="text" />
+              </div>
+              <div className="up-form-group">
+                <label>Ism *</label>
+                <input type="text" />
+              </div>
+              <div className="up-form-group">
+                <label>Otasining ismi</label>
+                <input type="text" />
+              </div>
+              <div className="up-form-group">
+                <label>Tug'ilgan sana</label>
+                <input type="date" />
+              </div>
+              <div className="up-form-group">
+                <label>Jins</label>
+                <div className="up-gender-toggle">
+                  <button className="active">Erkak</button>
+                  <button>Ayol</button>
+                </div>
+              </div>
+              <div className="up-form-group">
+                <label>Elektron pochta *</label>
+                <input type="email" />
+              </div>
+              <div className="up-form-group">
+                <label>Telefon raqami *</label>
+                <input type="text" value={user?.phone || '+998 '} readOnly />
+              </div>
+            </div>
+            <button className="up-text-btn" style={{color: 'red', marginTop: '40px', padding: 0, fontWeight: '500', display: 'flex'}} onClick={() => { logout(); navigate('/'); }}>
+              Tizimdan chiqish
+            </button>
+          </div>
+        ) : (
+          <div className="up-empty-state">
+            <div style={{fontSize: '48px', marginBottom: '20px'}}>📁</div>
+            <h2>Hozircha hech qanday ma'lumot yo'q</h2>
+            <p>
+              Siz tanlagan bo'limda hozircha ma'lumotlar mavjud emas.<br/>
+              Barcha kerakli narsalarni topish uchun qidirishdan foydalaning!
+            </p>
+            <button className="up-primary-btn" onClick={handleStartShopping}>
+              Xaridlarni boshlash
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
