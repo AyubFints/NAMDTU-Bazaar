@@ -65,7 +65,7 @@ const UserProfile = () => {
           <button className="up-nav-item">Ma'lumotlarim</button>
           <button className="up-nav-item">Ijtimoiy promokodlar</button>
           <button className="up-nav-item" onClick={() => { logout(); navigate('/'); }} style={{color: 'red', marginTop: '20px'}}>
-            Tizimdan chiqish
+            Profildan chiqish
           </button>
         </nav>
       </aside>
