@@ -7,7 +7,6 @@ import './UserProfile.css';
 const UserProfile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Faol');
   const [activeMenu, setActiveMenu] = useState('Buyurtmalarim');
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
 
@@ -63,7 +62,7 @@ const UserProfile = () => {
           <button className={`up-nav-item ${activeMenu === 'Sharhlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Sharhlar')}>
             Sharhlar <span className="up-dot"></span>
           </button>
-          <button className={`up-nav-item ${activeMenu === 'Ma\\'lumotlarim' ? 'active' : ''}`} onClick={() => setActiveMenu('Ma\\'lumotlarim')}>Ma'lumotlarim</button>
+          <button className={`up-nav-item ${activeMenu === "Ma'lumotlarim" ? 'active' : ''}`} onClick={() => setActiveMenu("Ma'lumotlarim")}>Ma'lumotlarim</button>
           <button className={`up-nav-item ${activeMenu === 'Ijtimoiy promokodlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Ijtimoiy promokodlar')}>Ijtimoiy promokodlar</button>
         </nav>
       </aside>
@@ -107,7 +106,7 @@ const UserProfile = () => {
               </div>
             </div>
             <button className="up-text-btn" style={{color: 'red', marginTop: '40px', padding: 0, fontWeight: '500', display: 'flex'}} onClick={() => { logout(); navigate('/'); }}>
-              Tizimdan chiqish
+              Profildan chiqish
             </button>
           </div>
         ) : (
