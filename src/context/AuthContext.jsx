@@ -9,15 +9,26 @@ export const AuthProvider = ({ children }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUser = async (retries = 3) => {
       const token = localStorage.getItem('token');
       if (token) {
-        try {
-          const { data } = await api.get('/auth/me');
-          setUser(data);
-        } catch (error) {
-          console.error("Failed to fetch user", error);
-          localStorage.removeItem('token');
+        for (let i = 0; i < retries; i++) {
+          try {
+            const { data } = await api.get('/auth/me');
+            setUser(data);
+            setLoading(false);
+            return;
+          } catch (error) {
+            // Faqat 401 (unauthorized) bo'lsa tokenni o'chirish
+            if (error.response && error.response.status === 401) {
+              localStorage.removeItem('token');
+              break;
+            }
+            // Tarmoq xatosi yoki server uxlayotgan bo'lsa qayta urinish
+            if (i < retries - 1) {
+              await new Promise(r => setTimeout(r, 2000));
+            }
+          }
         }
       }
       setLoading(false);
