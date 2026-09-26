@@ -105,7 +105,6 @@
 /* CONTENT */
 .up-content {
   flex: 1;
-  min-height: 500px;
 }
 
 .up-tabs {
@@ -142,7 +141,7 @@
   border-radius: 12px;
   padding: 40px 20px;
   text-align: center;
-  min-height: 500px;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
