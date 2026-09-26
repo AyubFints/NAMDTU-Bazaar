@@ -710,7 +710,7 @@
 
 @media (min-width: 769px) {
   .pd-top {
-    grid-template-columns: 72px 1.5fr 1.1fr 1.1fr !important;
+    grid-template-columns: 72px 1.1fr minmax(340px, 1.5fr) minmax(280px, 1.2fr) !important;
     gap: 64px !important;
     width: 100% !important;
     max-width: 100% !important;
