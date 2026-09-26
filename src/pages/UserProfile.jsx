@@ -134,7 +134,7 @@ const UserProfile = () => {
                 </button>
               </div>
             )}
-            <div className="up-empty-state">
+            <div className={`up-empty-state ${activeMenu !== 'Buyurtmalarim' ? 'no-border' : ''}`}>
               <div style={{marginBottom: '20px', color: '#cbd5e1'}}>
                 <FileText size={64} strokeWidth={1} />
               </div>
