@@ -42,7 +42,7 @@ const UserProfile = () => {
   const [myProducts, setMyProducts] = useState([]);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [productFormData, setProductFormData] = useState({
-    name: '', price: '', category: '', description: '', image: null,
+    name: '', price: '', oldPrice: '', category: '', description: '', image: null,
     cardNumber: '', cardHolderName: '', cardType: 'uzcard'
   });
 
@@ -149,6 +149,7 @@ const UserProfile = () => {
       const { data } = await api.post('/products', {
         name: productFormData.name,
         price: productFormData.price,
+        oldPrice: productFormData.oldPrice || null,
         category: productFormData.category,
         description: productFormData.description,
         images: productFormData.image ? [productFormData.image] : [],
@@ -159,7 +160,7 @@ const UserProfile = () => {
       });
       setMyProducts([...myProducts, data]);
       setProductModalOpen(false);
-      setProductFormData({ name: '', price: '', category: '', description: '', image: null, cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
+      setProductFormData({ name: '', price: '', oldPrice: '', category: '', description: '', image: null, cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
       alert("Tavar muvaffaqiyatli jo'natildi! Admin tasdiqlashi kutilmoqda.");
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
@@ -296,6 +297,10 @@ const UserProfile = () => {
                 <div className="creative-input-group">
                   <label>Narxi <span className="req">*</span></label>
                   <input type="number" className="creative-input" placeholder="150 000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
+                </div>
+                <div className="creative-input-group">
+                  <label>Oldingi narxi</label>
+                  <input type="number" className="creative-input" placeholder="200 000" value={productFormData.oldPrice} onChange={(e) => setProductFormData({...productFormData, oldPrice: e.target.value})} />
                 </div>
               </div>
 
