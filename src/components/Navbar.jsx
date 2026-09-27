@@ -67,11 +67,13 @@ const Navbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('touchmove', handleScroll, { passive: true });
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('touchmove', handleScroll);
     };
   }, []);
 
@@ -110,6 +112,7 @@ const Navbar = () => {
               placeholder={t('searchPlaceholder')} 
               className="search-input" 
               onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
             />
             <button className="search-btn">
               <Search size={20} />
