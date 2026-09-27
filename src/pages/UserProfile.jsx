@@ -289,47 +289,53 @@ const UserProfile = () => {
 
             <form onSubmit={handleProductSubmit} className="creative-form">
               <div className="creative-form-row">
-                <div className="up-form-group">
+                <div className="creative-input-group">
                   <label>Nomi <span className="req">*</span></label>
-                  <input type="text" className="up-field" placeholder="Masalan: Kurtka" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} required />
+                  <input type="text" className="creative-input" placeholder="Kurtka" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} required />
                 </div>
-                <div className="up-form-group">
+                <div className="creative-input-group">
                   <label>Narxi <span className="req">*</span></label>
-                  <input type="number" className="up-field" placeholder="150000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
+                  <input type="number" className="creative-input" placeholder="150 000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
                 </div>
               </div>
 
               <div className="creative-form-row">
-                <div className="up-form-group">
+                <div className="creative-input-group">
                   <label>Kategoriya <span className="req">*</span></label>
-                  <select className="up-field" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} required>
+                  <select className="creative-input" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} required>
                     <option value="">Tanlang</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.name}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
-                <div className="up-form-group">
-                  <label>Rasm yuklash</label>
+                <div className="creative-input-group">
+                  <label>Rasm</label>
                   <div className="creative-file-input">
                     <input type="file" accept="image/*" onChange={handleProductImage} />
-                    <span>{productFormData.image ? 'Rasm yuklandi ✓' : 'Fayl tanlash'}</span>
+                    <span>{productFormData.image ? 'Yuklandi ✓' : 'Fayl tanlash'}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="up-form-group">
+              <div className="creative-input-group" style={{ marginTop: '15px' }}>
                 <label>Ta'rif (qisqacha)</label>
-                <textarea className="up-field" rows="2" placeholder="Mahsulot haqida ma'lumot..." value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
+                <textarea className="creative-input" rows="3" placeholder="Mahsulot haqida ma'lumot..." value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
               </div>
 
               <div className="creative-card-section">
-                <label className="section-label">Plastik karta ma'lumotlari (foyda uchun)</label>
+                <label className="section-label">Plastik karta (foyda uchun)</label>
                 <div className="creative-form-row">
-                  <input type="text" className="up-field" placeholder="Karta raqami (8600...)" value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
-                  <input type="text" className="up-field" placeholder="Karta turi (UZCARD)" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
+                  <div className="creative-input-group">
+                    <input type="text" className="creative-input" placeholder="Karta raqami" value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
+                  </div>
+                  <div className="creative-input-group" style={{ maxWidth: '100px' }}>
+                    <input type="text" className="creative-input text-center" placeholder="UZCARD" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
+                  </div>
                 </div>
-                <input type="text" className="up-field" style={{ marginTop: '10px' }} placeholder="Karta egasi (Ism Familiya)" value={productFormData.cardHolderName} onChange={(e) => setProductFormData({...productFormData, cardHolderName: e.target.value})} />
+                <div className="creative-input-group" style={{ marginTop: '10px' }}>
+                  <input type="text" className="creative-input" placeholder="Karta egasi (Ism Familiya)" value={productFormData.cardHolderName} onChange={(e) => setProductFormData({...productFormData, cardHolderName: e.target.value})} />
+                </div>
               </div>
 
               <button type="submit" className="creative-submit-btn">Tavarni Jo'natish</button>
