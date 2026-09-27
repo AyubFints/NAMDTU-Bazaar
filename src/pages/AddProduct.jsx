@@ -107,7 +107,10 @@ const AddProduct = () => {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <label style={{ fontSize: '13px', color: '#64748b' }}>Karta raqam kiriting</label>
-              <input type="text" name="cardNumber" className="form-control" placeholder="Masalan: 8600 1234 5678 9012" value={formData.cardNumber} onChange={handleChange} required />
+              <input type="text" name="cardNumber" className="form-control" placeholder="Masalan: 8600 1234 5678 9012" value={formData.cardNumber} onChange={(e) => {
+                const onlyNums = e.target.value.replace(/\D/g, '');
+                setFormData({ ...formData, cardNumber: onlyNums });
+              }} required />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

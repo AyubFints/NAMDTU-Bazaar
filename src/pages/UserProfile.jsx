@@ -327,7 +327,10 @@ const UserProfile = () => {
                 <label className="section-label">Plastik karta (foyda uchun)</label>
                 <div className="creative-form-row">
                   <div className="creative-input-group">
-                    <input type="text" className="creative-input" placeholder="Karta raqami" value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
+                    <input type="text" className="creative-input" placeholder="Karta raqami" value={productFormData.cardNumber} onChange={(e) => {
+                      const onlyNums = e.target.value.replace(/\D/g, '');
+                      setProductFormData({...productFormData, cardNumber: onlyNums});
+                    }} />
                   </div>
                   <div className="creative-input-group" style={{ maxWidth: '100px' }}>
                     <input type="text" className="creative-input text-center" placeholder="UZCARD" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
