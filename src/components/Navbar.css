@@ -119,6 +119,7 @@
   flex: 1;
   margin: 0 40px;
   position: relative;
+  min-width: 0;
 }
 
 .navbar-search {
@@ -128,6 +129,7 @@
   border-radius: 8px;
   padding: 4px 4px 4px 16px;
   height: 48px;
+  width: 100%;
 }
 
 .search-categories-dropdown {
@@ -191,6 +193,7 @@
   font-family: inherit;
   font-size: 15px;
   color: #333;
+  min-width: 0;
 }
 
 .search-input::placeholder {
@@ -479,12 +482,15 @@
 
   .navbar-search-wrapper {
     margin: 0 8px;
+    flex: 1;
+    min-width: 0;
   }
 
   .navbar-search {
     height: 38px;
     border-radius: 6px;
     padding: 3px 3px 3px 12px;
+    width: 100%;
   }
 
   .search-categories-dropdown {
