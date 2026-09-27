@@ -581,20 +581,7 @@
   color: #1a1a2e;
 }
 
-@media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px; /* Yopishibroq (tighter gap) */
-  }
 
-  .product-image {
-    aspect-ratio: 4/5; /* Simizroq, qalinroq (thicker/wider image on mobile) */
-  }
-
-  .product-info {
-    padding: 8px 8px 12px;
-  }
-}
 
 .visual-categories-bar {
   display: flex;
@@ -704,5 +691,26 @@
 @media (max-width: 992px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .product-image {
+    aspect-ratio: 4/5;
+  }
+
+  .product-info {
+    padding: 8px 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

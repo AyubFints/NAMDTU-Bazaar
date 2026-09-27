@@ -57,7 +57,6 @@ const Navbar = () => {
       setLangOpen(false);
       setMenuOpen(false);
       setMobileLangOpen(false);
-      setSearchFocused(false);
     };
 
     const fetchCategories = async (retries = 3) => {
@@ -149,7 +148,6 @@ const Navbar = () => {
               placeholder={t('searchPlaceholder')} 
               className="search-input" 
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
             />
             <button className="search-btn">
               <Search size={20} />
