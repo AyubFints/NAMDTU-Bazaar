@@ -153,6 +153,18 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 20px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 8px; /* for scrollbar */
+}
+
+/* custom scrollbar */
+.dp-years-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.dp-years-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .dp-year-btn {
@@ -166,13 +178,18 @@
   cursor: pointer;
 }
 
-.dp-year-btn:hover {
+.dp-year-btn:hover:not(.dp-disabled) {
   background: #f1f5f9;
 }
 
 .dp-year-btn.dp-selected {
   background: #1e293b;
   color: white;
+}
+
+.dp-year-btn.dp-disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
 }
 
 .dp-footer {

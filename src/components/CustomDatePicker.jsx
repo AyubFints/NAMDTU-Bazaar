@@ -34,6 +34,18 @@ const CustomDatePicker = ({ value, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (view === 'years') {
+      setTimeout(() => {
+        const grid = document.getElementById('dp-years-grid-id');
+        const selected = grid?.querySelector('.dp-selected');
+        if (selected && grid) {
+          grid.scrollTop = selected.offsetTop - grid.offsetTop - 50;
+        }
+      }, 0);
+    }
+  }, [view]);
+
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => {
     const day = new Date(year, month, 1).getDay();
@@ -65,11 +77,9 @@ const CustomDatePicker = ({ value, onChange }) => {
   };
 
   const generateYears = () => {
-    const year = currentDate.getFullYear();
-    const startYear = year - 7;
     const years = [];
-    for (let i = 0; i < 15; i++) {
-      years.push(startYear + i);
+    for (let i = 1900; i <= 2030; i++) {
+      years.push(i);
     }
     return years;
   };
@@ -79,15 +89,20 @@ const CustomDatePicker = ({ value, onChange }) => {
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    if (nextDate.getFullYear() >= 2026) return;
+    setCurrentDate(nextDate);
   };
 
   const selectDay = (dayObj) => {
     if (!dayObj.isCurrentMonth) return;
+    // Don't allow selecting dates in disabled years (>= 2026)
+    if (currentDate.getFullYear() >= 2026) return;
     setTempDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayObj.day));
   };
 
   const selectYear = (year) => {
+    if (year >= 2026) return; // disabled
     setCurrentDate(new Date(year, currentDate.getMonth(), 1));
     setView('days');
   };
@@ -162,11 +177,11 @@ const CustomDatePicker = ({ value, onChange }) => {
           ) : (
             <div className="dp-years-view">
               <button className="dp-back-btn" onClick={() => setView('days')}>Ortga qaytish</button>
-              <div className="dp-years-grid">
+              <div className="dp-years-grid" id="dp-years-grid-id">
                 {generateYears().map(y => (
                   <button 
                     key={y} 
-                    className={`dp-year-btn ${y === currentDate.getFullYear() ? 'dp-selected' : ''}`}
+                    className={`dp-year-btn ${y === currentDate.getFullYear() ? 'dp-selected' : ''} ${y >= 2026 ? 'dp-disabled' : ''}`}
                     onClick={() => selectYear(y)}
                   >
                     {y}
