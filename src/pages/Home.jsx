@@ -58,7 +58,7 @@ const Home = () => {
   const [showMoreCats, setShowMoreCats] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
-  const [banners, setBanners] = useState(HERO_SLIDES);
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
   const sliderRef = useRef(null);
@@ -93,9 +93,7 @@ const Home = () => {
       
       try {
         const { data: bannersData } = await api.get('/banners');
-        if (bannersData && bannersData.length > 0) {
-          setBanners(bannersData);
-        }
+        setBanners(bannersData || []);
       } catch (error) {
         console.error("Failed to load banners", error);
       }

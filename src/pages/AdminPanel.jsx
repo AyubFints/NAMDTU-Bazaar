@@ -4,26 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Package, FolderPlus, ShoppingBag, Plus, Trash2, Image, Save, X, Edit2 } from 'lucide-react';
 import api from '../api/axios';
 import './AdminPanel.css';
-const HERO_SLIDES = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&auto=format&fit=crop&q=80",
-    title: "Aziz Talabalar, Xush Kelibsiz!",
-    subtitle: "O'z qo'l mehnatingiz bilan yaratgan mahsulotlarni soting va tengdoshlaringizning ajoyib ishlarini xarid qiling."
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1511130558090-00af810c2111?w=1200&auto=format&fit=crop&q=80",
-    title: "Kuzgi kiyimlar to'plami",
-    subtitle: "Kuz fasli uchun issiq va zamonaviy kiyimlar"
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&auto=format&fit=crop&q=80",
-    title: "Onalar va bolalar uchun",
-    subtitle: "Eng sifatli va qulay mahsulotlar"
-  }
-];
+const HERO_SLIDES = [];
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('products');
@@ -59,12 +40,14 @@ const AdminPanel = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes] = await Promise.all([
+        const [productsRes, categoriesRes, bannersRes] = await Promise.all([
           api.get('/products/admin'),
-          api.get('/categories')
+          api.get('/categories'),
+          api.get('/banners')
         ]);
         setProducts(productsRes.data);
         setCategories(categoriesRes.data);
+        setBanners(bannersRes.data || []);
       } catch (error) {
         console.error("Failed to load data in admin", error);
       }
@@ -95,14 +78,7 @@ const AdminPanel = () => {
   }, []);
 
   // Banners list
-  const [banners, setBanners] = useState(() => {
-    const saved = localStorage.getItem('hero_banners');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.length > 0) return parsed;
-    }
-    return HERO_SLIDES;
-  });
+  const [banners, setBanners] = useState([]);
   const [newBannerImage, setNewBannerImage] = useState('');
   const [newBannerTitle, setNewBannerTitle] = useState('');
   const [newBannerSubtitle, setNewBannerSubtitle] = useState('');
@@ -116,9 +92,7 @@ const AdminPanel = () => {
 
   
 
-  useEffect(() => {
-    localStorage.setItem('hero_banners', JSON.stringify(banners));
-  }, [banners]);
+  // localStorage logic removed
 
   useEffect(() => {
     localStorage.setItem('notifications', JSON.stringify(notifications));
@@ -382,36 +356,39 @@ const AdminPanel = () => {
     }
   };
 
-  const handleAddBanner = (e) => {
+  const handleAddBanner = async (e) => {
     e.preventDefault();
     if (!newBannerImage.trim()) {
       showSuccess("Iltimos, banner rasmini kiriting!");
       return;
     }
 
-    if (editingBannerId) {
-      setBanners(banners.map(b => b.id === editingBannerId ? {
-        ...b,
-        image: newBannerImage,
-        title: newBannerTitle,
-        subtitle: newBannerSubtitle
-      } : b));
-      showSuccess("Banner yangilandi!");
-      setEditingBannerId(null);
-    } else {
-      const newBanner = {
-        id: Date.now(),
-        image: newBannerImage,
-        title: newBannerTitle,
-        subtitle: newBannerSubtitle
-      };
-      setBanners([...banners, newBanner]);
-      showSuccess("Yangi banner qo'shildi!");
-    }
+    try {
+      if (editingBannerId) {
+        const { data } = await api.put(`/banners/${editingBannerId}`, {
+          image: newBannerImage,
+          title: newBannerTitle,
+          subtitle: newBannerSubtitle
+        });
+        setBanners(banners.map(b => b.id === editingBannerId ? data : b));
+        showSuccess("Banner yangilandi!");
+        setEditingBannerId(null);
+      } else {
+        const { data } = await api.post('/banners', {
+          image: newBannerImage,
+          title: newBannerTitle,
+          subtitle: newBannerSubtitle
+        });
+        setBanners([...banners, data]);
+        showSuccess("Yangi banner qo'shildi!");
+      }
 
-    setNewBannerImage('');
-    setNewBannerTitle('');
-    setNewBannerSubtitle('');
+      setNewBannerImage('');
+      setNewBannerTitle('');
+      setNewBannerSubtitle('');
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const handleEditBannerClick = (banner) => {
@@ -429,11 +406,16 @@ const AdminPanel = () => {
     setNewBannerSubtitle('');
   };
 
-  const confirmDeleteBanner = () => {
+  const confirmDeleteBanner = async () => {
     if (bannerToDelete) {
-      setBanners(banners.filter(b => b.id !== bannerToDelete));
-      setBannerToDelete(null);
-      showSuccess("Banner o'chirildi!");
+      try {
+        await api.delete(`/banners/${bannerToDelete}`);
+        setBanners(banners.filter(b => b.id !== bannerToDelete));
+        setBannerToDelete(null);
+        showSuccess("Banner o'chirildi!");
+      } catch (error) {
+        alert("Xatolik: " + (error.response?.data?.message || error.message));
+      }
     }
   };
 
