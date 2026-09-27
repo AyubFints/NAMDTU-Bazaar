@@ -135,6 +135,7 @@ const UserProfile = () => {
           </button>
           <button className={`up-nav-item ${activeMenu === "Ma'lumotlarim" ? 'active' : ''}`} onClick={() => setActiveMenu("Ma'lumotlarim")}>Ma'lumotlarim</button>
           <button className={`up-nav-item ${activeMenu === 'Ijtimoiy promokodlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Ijtimoiy promokodlar')}>Ijtimoiy promokodlar</button>
+          <button className={`up-nav-item ${activeMenu === "Do'kon ochish" ? 'active' : ''}`} onClick={() => setActiveMenu("Do'kon ochish")}>Do'kon ochish</button>
         </nav>
       </aside>
 
@@ -200,6 +201,13 @@ const UserProfile = () => {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        ) : activeMenu === "Do'kon ochish" ? (
+          <div className="up-settings-wrapper">
+            <h2>Do'kon ochish</h2>
+            <div className="up-form-group" style={{ marginTop: '20px' }}>
+              <p>Tez orada bu yerda do'kon yaratish imkoniyati qo'shiladi...</p>
             </div>
           </div>
         ) : (
