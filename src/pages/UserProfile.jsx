@@ -266,67 +266,73 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* Product Creation Modal */}
+      {/* Product Creation Modal (Creative & Compact) */}
       {productModalOpen && (
         <div className="up-modal-overlay">
-          <div className="up-modal" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="up-modal creative-modal">
             <button className="up-modal-close" onClick={() => setProductModalOpen(false)}>
               <X size={20} />
             </button>
-            <h3 style={{ marginBottom: '10px' }}>Tavar yaratish</h3>
+            <div className="creative-modal-header">
+              <div className="creative-icon-wrapper">
+                <Store size={24} color="#3b82f6" />
+              </div>
+              <div>
+                <h3>Yangi Tavar</h3>
+                <p>O'z mahsulotingizni soting</p>
+              </div>
+            </div>
             
-            <div style={{ background: '#eff6ff', borderLeft: '4px solid #3b82f6', padding: '12px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', color: '#1e40af' }}>
-              Admin tavarni qachonki tasdiqlasa, keyin tavar NAMDTU Bazaar dasturiga qo'shiladi va o'zingizning savdoyingizni boshlaysiz.
+            <div className="creative-alert">
+              <span>Admin tasdiqlagandan so'ng, ushbu tavar NAMDTU Bazaar-da paydo bo'ladi.</span>
             </div>
 
-            <form onSubmit={handleProductSubmit}>
-              <div className="up-form-group">
-                <label>Mahsulot nomi <span className="req">*</span></label>
-                <input type="text" className="up-field" placeholder="Masalan: Qishki kurtka" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} required />
-              </div>
-              <div className="up-form-group">
-                <label>Narxi (so'm) <span className="req">*</span></label>
-                <input type="number" className="up-field" placeholder="Masalan: 150000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
-              </div>
-              <div className="up-form-group">
-                <label>Kategoriya <span className="req">*</span></label>
-                <select className="up-field" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} required>
-                  <option value="">-- Tanlang --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="up-form-group">
-                <label>Mahsulot ta'rifi</label>
-                <textarea className="up-field" style={{ width: '100%', padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', minHeight: '80px' }} value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
+            <form onSubmit={handleProductSubmit} className="creative-form">
+              <div className="creative-form-row">
+                <div className="up-form-group">
+                  <label>Nomi <span className="req">*</span></label>
+                  <input type="text" className="up-field" placeholder="Masalan: Kurtka" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} required />
+                </div>
+                <div className="up-form-group">
+                  <label>Narxi <span className="req">*</span></label>
+                  <input type="number" className="up-field" placeholder="150000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
+                </div>
               </div>
 
-              <div style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#f8fafc', marginBottom: '20px' }}>
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>Karta ma'lumotlari</h4>
+              <div className="creative-form-row">
                 <div className="up-form-group">
-                  <label>Karta raqami</label>
-                  <input type="text" className="up-field" placeholder="8600 1234..." value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
+                  <label>Kategoriya <span className="req">*</span></label>
+                  <select className="up-field" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} required>
+                    <option value="">Tanlang</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="up-form-group">
-                  <label>Karta egasi</label>
-                  <input type="text" className="up-field" placeholder="Ism familiya" value={productFormData.cardHolderName} onChange={(e) => setProductFormData({...productFormData, cardHolderName: e.target.value})} />
-                </div>
-                <div className="up-form-group">
-                  <label>Karta turi</label>
-                  <input type="text" className="up-field" placeholder="UZCARD, HUMO" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
+                  <label>Rasm yuklash</label>
+                  <div className="creative-file-input">
+                    <input type="file" accept="image/*" onChange={handleProductImage} />
+                    <span>{productFormData.image ? 'Rasm yuklandi ✓' : 'Fayl tanlash'}</span>
+                  </div>
                 </div>
               </div>
 
               <div className="up-form-group">
-                <label>Rasm yuklash</label>
-                <input type="file" accept="image/*" onChange={handleProductImage} style={{ display: 'block', width: '100%', padding: '10px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }} />
-                {productFormData.image && (
-                  <img src={productFormData.image} alt="Preview" style={{ height: '80px', marginTop: '10px', borderRadius: '8px' }} />
-                )}
+                <label>Ta'rif (qisqacha)</label>
+                <textarea className="up-field" rows="2" placeholder="Mahsulot haqida ma'lumot..." value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
               </div>
 
-              <button type="submit" className="up-primary-btn" style={{ width: '100%' }}>Jo'natish</button>
+              <div className="creative-card-section">
+                <label className="section-label">Plastik karta ma'lumotlari (foyda uchun)</label>
+                <div className="creative-form-row">
+                  <input type="text" className="up-field" placeholder="Karta raqami (8600...)" value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
+                  <input type="text" className="up-field" placeholder="Karta turi (UZCARD)" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
+                </div>
+                <input type="text" className="up-field" style={{ marginTop: '10px' }} placeholder="Karta egasi (Ism Familiya)" value={productFormData.cardHolderName} onChange={(e) => setProductFormData({...productFormData, cardHolderName: e.target.value})} />
+              </div>
+
+              <button type="submit" className="creative-submit-btn">Tavarni Jo'natish</button>
             </form>
           </div>
         </div>
