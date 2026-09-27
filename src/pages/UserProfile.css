@@ -435,3 +435,38 @@
 .up-save-btn:hover {
   background: rgba(10, 16, 82, 0.9);
 }
+
+/* Store App Modal Styles */
+.up-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.up-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  margin-left: 4px;
+}
+.up-field input, .up-field select {
+  padding: 14px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  font-size: 15px;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+.up-field input:focus, .up-field select:focus {
+  border-color: rgb(10, 16, 82);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(10, 16, 82, 0.1);
+}
+.up-modal {
+  border-radius: 24px !important;
+  padding: 32px !important;
+}
