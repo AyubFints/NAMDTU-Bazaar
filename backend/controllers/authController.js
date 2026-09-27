@@ -113,3 +113,30 @@ exports.toggleFavorite = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    const user = await User.findByPk(req.user.id);
+
+    if (user) {
+      user.name = name || user.name;
+      // Optional: check if phone is unique if changing phone
+      user.phone = phone || user.phone;
+      
+      await user.save();
+      
+      res.json({
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        token: generateToken(user.id),
+      });
+    } else {
+      res.status(404).json({ message: 'Foydalanuvchi topilmadi' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

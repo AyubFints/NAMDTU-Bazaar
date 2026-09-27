@@ -63,8 +63,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
-  const updateUser = (updatedFields) => {
-    setUser(prev => ({ ...prev, ...updatedFields }));
+  const updateUser = async (updatedFields) => {
+    try {
+      const { data } = await api.put('/auth/profile', updatedFields);
+      setUser(data);
+      return { success: true };
+    } catch (error) {
+      // Fallback to local update if API fails for some reason
+      setUser(prev => ({ ...prev, ...updatedFields }));
+      return { success: false, message: error.message };
+    }
   };
 
   return (

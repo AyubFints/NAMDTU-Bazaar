@@ -43,23 +43,27 @@ const UserProfile = () => {
     setShowError(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.lastName.trim() || !formData.firstName.trim() || !formData.email.trim() || !formData.phone.trim()) {
       setShowError(true);
       return;
     }
     
     setIsSaving(true);
-    // Simulate API request
-    setTimeout(() => {
-      updateUser({ 
-        name: `${formData.lastName} ${formData.firstName}`.trim(),
-        phone: formData.phone
-      });
-      setIsSaving(false);
+    
+    const res = await updateUser({ 
+      name: `${formData.lastName} ${formData.firstName}`.trim(),
+      phone: formData.phone
+    });
+    
+    if (res?.success) {
       setIsDirty(false);
       setShowError(false);
-    }, 1000);
+    } else {
+      setShowError(true);
+    }
+    
+    setIsSaving(false);
   };
 
   const handleCancel = () => {
