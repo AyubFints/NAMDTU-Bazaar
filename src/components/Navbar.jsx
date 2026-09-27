@@ -23,6 +23,12 @@ const Navbar = () => {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  const getFirstName = () => {
+    if (!user || !user.name || user.name === 'Foydalanuvchi') return 'Profil';
+    const parts = user.name.split(' ');
+    return parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+  };
+
   const languages = {
     uz: { code: 'uz', name: "O'zbek", flagUrl: 'https://flagcdn.com/w40/uz.png' },
     ru: { code: 'ru', name: "Rus", flagUrl: 'https://flagcdn.com/w40/ru.png' },
@@ -174,7 +180,7 @@ const Navbar = () => {
                 ) : (
                   <User size={22} />
                 )}
-                <span>{(user.name && user.name !== 'Foydalanuvchi') ? user.name : 'Profil'}</span>
+                <span>{getFirstName()}</span>
               </Link>
             </div>
           ) : (
@@ -252,7 +258,7 @@ const Navbar = () => {
             {user ? (
               <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="mobile-link" onClick={() => setMenuOpen(false)}>
                 <User size={22} />
-                <span>{(user.name && user.name !== 'Foydalanuvchi') ? user.name : 'Profil'}</span>
+                <span>{getFirstName()}</span>
               </Link>
             ) : (
               <button className="mobile-link login-btn-nav" onClick={() => {setMenuOpen(false); openLoginModal();}} style={{background:"transparent", border:"none", width:"100%", textAlign:"left", cursor:"pointer", color:"#fff"}}>
