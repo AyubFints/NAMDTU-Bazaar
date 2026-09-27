@@ -563,21 +563,26 @@
 }
 
 .store-app-actions .edit-btn {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .store-app-actions .edit-btn:hover {
-  background: #dbeafe;
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
 }
 
 .store-app-actions .delete-btn {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #ffffff;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
 }
 
 .store-app-actions .delete-btn:hover {
-  background: #fee2e2;
+  background: #fef2f2;
+  border-color: #fca5a5;
 }
 
 .store-app-footer {

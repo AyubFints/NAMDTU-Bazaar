@@ -1147,23 +1147,23 @@
 }
 
 .admin-store-actions .btn-approve {
-  background: #10b981;
+  background: #1e293b;
   color: white;
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 4px rgba(30, 41, 59, 0.1);
 }
 
 .admin-store-actions .btn-approve:hover {
-  background: #059669;
-  box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.3);
+  background: #0f172a;
+  box-shadow: 0 4px 6px rgba(30, 41, 59, 0.2);
 }
 
 .admin-store-actions .btn-reject {
-  background: #f43f5e;
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2);
+  background: #f1f5f9;
+  color: #475569;
+  box-shadow: none;
 }
 
 .admin-store-actions .btn-reject:hover {
-  background: #e11d48;
-  box-shadow: 0 6px 8px -1px rgba(244, 63, 94, 0.3);
+  background: #e2e8f0;
+  color: #1e293b;
 }
