@@ -53,16 +53,29 @@ const Navbar = () => {
       setSearchFocused(false);
     };
 
-    const fetchCategories = async () => {
-      try {
-        const { data } = await api.get('/categories');
-        setCategories(data || []);
-      } catch (error) {
-        console.error('Failed to load categories', error);
+    const fetchCategories = async (retries = 3) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const { data } = await api.get('/categories');
+          setCategories(data || []);
+          return;
+        } catch (error) {
+          if (i < retries - 1) {
+            await new Promise(r => setTimeout(r, 2000));
+          } else {
+            console.error('Failed to load categories', error);
+          }
+        }
       }
     };
 
     fetchCategories();
+
+    // Listen for custom event if categories are updated from Admin Panel
+    const handleCategoriesUpdate = () => {
+      fetchCategories(1);
+    };
+    window.addEventListener('categoriesUpdated', handleCategoriesUpdate);
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -74,6 +87,7 @@ const Navbar = () => {
       document.removeEventListener('touchstart', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('touchmove', handleScroll);
+      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate);
     };
   }, []);
 

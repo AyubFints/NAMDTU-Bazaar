@@ -257,6 +257,7 @@ const AdminPanel = () => {
       setNewCategoryName('');
       setNewCategoryVariants('');
       showSuccess('Yangi bo\'lim yaratildi!');
+      window.dispatchEvent(new Event('categoriesUpdated'));
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
     }
@@ -317,6 +318,7 @@ const AdminPanel = () => {
         await api.delete(`/categories/${id}`);
         setCategories(categories.filter(c => c.id !== id));
         showSuccess('Bo\'lim o\'chirildi!');
+        window.dispatchEvent(new Event('categoriesUpdated'));
       } catch (error) {
         alert("Xatolik: " + (error.response?.data?.message || error.message));
       }
