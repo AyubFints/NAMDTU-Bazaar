@@ -16,7 +16,7 @@
 }
 
 .up-bonus-card {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: rgb(10, 16, 82);
   border-radius: 16px;
   padding: 32px 24px;
   color: white;
@@ -170,7 +170,7 @@
 }
 
 .up-primary-btn {
-  background: #8b5cf6;
+  background: rgb(10, 16, 82);
   color: white;
   border: none;
   border-radius: 8px;
@@ -184,7 +184,7 @@
 }
 
 .up-primary-btn:hover {
-  background: #7c3aed;
+  background: rgba(10, 16, 82, 0.9);
 }
 
 .up-text-btn {
