@@ -31,7 +31,7 @@ const Navbar = () => {
 
   const activeLangConfig = languages[lang];
 
-  // Close dropdowns when clicking outside
+  // Close dropdowns when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (langRef.current && !langRef.current.contains(e.target)) {
@@ -50,6 +50,7 @@ const Navbar = () => {
       setLangOpen(false);
       setMenuOpen(false);
       setMobileLangOpen(false);
+      setSearchFocused(false);
     };
 
     const fetchCategories = async () => {
@@ -64,10 +65,12 @@ const Navbar = () => {
     fetchCategories();
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
