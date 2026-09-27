@@ -309,35 +309,36 @@ const UserProfile = () => {
               {myApplications.length > 0 ? (
                 <div className="store-apps-list" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                   {myApplications.map(app => (
-                    <div key={app.id} style={{ border: '1px solid #e2e8f0', padding: '15px', borderRadius: '12px', background: '#f8fafc' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <h3 style={{ margin: '0 0 10px 0', color: '#0a1052' }}>{app.storeName}</h3>
-                        <span style={{ 
-                          padding: '4px 10px', 
-                          borderRadius: '20px', 
-                          fontSize: '12px', 
-                          fontWeight: 'bold',
-                          background: app.status === 'approved' ? '#dcfce7' : app.status === 'rejected' ? '#fee2e2' : '#fef9c3',
-                          color: app.status === 'approved' ? '#166534' : app.status === 'rejected' ? '#991b1b' : '#854d0e'
-                        }}>
+                    <div key={app.id} className="store-app-card">
+                      <div className="store-app-header">
+                        <h3>{app.storeName}</h3>
+                        <span className={`store-app-badge ${app.status}`}>
                           {app.status === 'approved' ? 'Qabul qilindi' : app.status === 'rejected' ? 'Qabul qilinmadi' : 'Kutilmoqda'}
                         </span>
                       </div>
-                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Boshliq:</strong> {app.ownerName}</p>
-                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Nomer:</strong> {app.phone}</p>
-                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Kategoriyalar:</strong> {app.categories?.join(', ')}</p>
+                      
+                      <div className="store-app-body">
+                        <p><strong>Boshliq:</strong> <span>{app.ownerName}</span></p>
+                        <p><strong>Nomer:</strong> <span>{app.phone}</span></p>
+                        <p><strong>Kategoriyalar:</strong> <span>{app.categories?.join(', ')}</span></p>
+                      </div>
                       
                       {app.status === 'pending' && (
-                        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-                          <button onClick={() => openEditStoreApp(app)} style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Edit2 size={14}/> O'zgartirish</button>
-                          <button onClick={() => handleDeleteStoreApp(app.id)} style={{ padding: '6px 12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Trash2 size={14}/> O'chirish</button>
+                        <div className="store-app-actions">
+                          <button onClick={() => openEditStoreApp(app)} className="edit-btn">
+                            <Edit2 size={16}/> O'zgartirish
+                          </button>
+                          <button onClick={() => handleDeleteStoreApp(app.id)} className="delete-btn">
+                            <Trash2 size={16}/> O'chirish
+                          </button>
                         </div>
                       )}
                       
                       {app.status === 'pending' && (
-                        <p style={{ marginTop: '15px', fontSize: '13px', color: '#64748b', fontStyle: 'italic' }}>
+                        <div className="store-app-footer">
+                          <span className="pulsing-dot"></span>
                           Ko'rib chiqilmoqda. Ertagacha natijani aytamiz.
-                        </p>
+                        </div>
                       )}
                     </div>
                   ))}
