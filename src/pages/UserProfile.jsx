@@ -39,7 +39,13 @@ const UserProfile = () => {
   const [categories, setCategories] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
   const [unseenApproved, setUnseenApproved] = useState(false);
-  
+  const [myProducts, setMyProducts] = useState([]);
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [productFormData, setProductFormData] = useState({
+    name: '', price: '', category: '', description: '', image: null,
+    cardNumber: '', cardHolderName: '', cardType: 'uzcard'
+  });
+
   useEffect(() => {
     const approvedApps = myApplications.filter(a => a.status === 'approved').length;
     const approvedProds = myProducts.filter(p => p.status === 'approved').length;
@@ -57,14 +63,6 @@ const UserProfile = () => {
     localStorage.setItem('lastSeenApprovedCount', (approvedApps + approvedProds).toString());
     setUnseenApproved(false);
   };
-  
-  // Product state
-  const [myProducts, setMyProducts] = useState([]);
-  const [productModalOpen, setProductModalOpen] = useState(false);
-  const [productFormData, setProductFormData] = useState({
-    name: '', price: '', category: '', description: '', image: null,
-    cardNumber: '', cardHolderName: '', cardType: 'uzcard'
-  });
   
   useEffect(() => {
     const fetchStoreData = async () => {
