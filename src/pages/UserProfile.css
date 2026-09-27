@@ -298,6 +298,8 @@
   border-radius: 8px;
   font-size: 15px;
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 .up-form-group input:focus {
   border-color: rgb(10, 16, 82);
