@@ -327,3 +327,106 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Settings Form additions */
+.up-settings-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px;
+  background: white;
+}
+.up-settings-wrapper h2 {
+  font-size: 20px;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+.req {
+  color: #ef4444;
+}
+.input-with-clear {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  background: #94a3b8;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.phone-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.phone-input-wrapper .flag-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+}
+.phone-input-wrapper input {
+  padding-left: 40px !important;
+}
+.up-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+}
+.up-logout-btn {
+  background: none;
+  border: none;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.up-logout-btn:hover {
+  color: #1e293b;
+}
+.up-form-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.up-error-msg {
+  color: #ef4444;
+  font-size: 13px;
+}
+.up-form-actions {
+  display: flex;
+  gap: 12px;
+}
+.up-cancel-btn {
+  background: none;
+  border: none;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+.up-cancel-btn:hover {
+  color: #1e293b;
+}
+.up-save-btn {
+  background: #6200ea; /* Purple as in image */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.up-save-btn:hover {
+  background: #5000c2;
+}

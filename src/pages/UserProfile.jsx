@@ -11,6 +11,48 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState('Faol');
   const [showUnderConstruction, setShowUnderConstruction] = useState(false);
 
+  const [formData, setFormData] = useState({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    birthDate: '',
+    gender: 'Erkak',
+    email: '',
+    phone: user?.phone || '+998 '
+  });
+  const [isDirty, setIsDirty] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
+    setShowError(false);
+  };
+
+  const handleSave = () => {
+    if (!formData.lastName.trim() || !formData.firstName.trim() || !formData.email.trim() || !formData.phone.trim()) {
+      setShowError(true);
+      return;
+    }
+    // Perform save logic here
+    setIsDirty(false);
+    setShowError(false);
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      lastName: '',
+      firstName: '',
+      middleName: '',
+      birthDate: '',
+      gender: 'Erkak',
+      email: '',
+      phone: user?.phone || '+998 '
+    });
+    setIsDirty(false);
+    setShowError(false);
+  };
+
   // Auto-hide modal after 3 seconds
   useEffect(() => {
     let timer;
@@ -71,44 +113,64 @@ const UserProfile = () => {
       {/* RIGHT CONTENT */}
       <main className="up-content">
         {activeMenu === "Ma'lumotlarim" ? (
-          <div className="up-settings-form">
+          <div className="up-settings-wrapper">
             <h2>Ma'lumotlarim</h2>
             <div className="up-form-grid">
               <div className="up-form-group">
-                <label>Familiya *</label>
-                <input type="text" />
+                <label>Familiya <span className="req">*</span></label>
+                <div className="input-with-clear">
+                  <input type="text" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)} />
+                  {formData.lastName && <button className="clear-btn" onClick={() => handleInputChange('lastName', '')}><X size={14}/></button>}
+                </div>
               </div>
               <div className="up-form-group">
-                <label>Ism *</label>
-                <input type="text" />
+                <label>Ism <span className="req">*</span></label>
+                <input type="text" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)} />
               </div>
               <div className="up-form-group">
                 <label>Otasining ismi</label>
-                <input type="text" />
+                <input type="text" value={formData.middleName} onChange={(e) => handleInputChange('middleName', e.target.value)} />
               </div>
               <div className="up-form-group">
                 <label>Tug'ilgan sana</label>
-                <input type="date" />
+                <input type="date" value={formData.birthDate} onChange={(e) => handleInputChange('birthDate', e.target.value)} />
               </div>
               <div className="up-form-group">
                 <label>Jins</label>
                 <div className="up-gender-toggle">
-                  <button className="active">Erkak</button>
-                  <button>Ayol</button>
+                  <button className={formData.gender === 'Erkak' ? 'active' : ''} onClick={() => handleInputChange('gender', 'Erkak')}>Erkak</button>
+                  <button className={formData.gender === 'Ayol' ? 'active' : ''} onClick={() => handleInputChange('gender', 'Ayol')}>Ayol</button>
                 </div>
               </div>
               <div className="up-form-group">
-                <label>Elektron pochta *</label>
-                <input type="email" />
+                <label>Elektron pochta <span className="req">*</span></label>
+                <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} />
               </div>
               <div className="up-form-group">
-                <label>Telefon raqami *</label>
-                <input type="text" value={user?.phone || '+998 '} readOnly />
+                <label>Telefon raqami <span className="req">*</span></label>
+                <div className="phone-input-wrapper">
+                  <span className="flag-icon">🇺🇿</span>
+                  <input type="text" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} />
+                  {formData.phone && formData.phone !== '+998 ' && <button className="clear-btn" onClick={() => handleInputChange('phone', '+998 ')}><X size={14}/></button>}
+                </div>
               </div>
             </div>
-            <button className="up-text-btn" style={{color: 'red', marginTop: '40px', padding: 0, fontWeight: '500', display: 'flex'}} onClick={() => { logout(); navigate('/'); }}>
-              Profildan chiqish
-            </button>
+            
+            <div className="up-form-footer">
+              <button className="up-logout-btn" onClick={() => { logout(); navigate('/'); }}>
+                Tizimdan chiqish
+              </button>
+
+              <div className="up-form-actions-wrapper">
+                {showError && <span className="up-error-msg">Iltimos qolgan joylarni ham to'ldiring!</span>}
+                {isDirty && (
+                  <div className="up-form-actions">
+                    <button className="up-cancel-btn" onClick={handleCancel}>Bekor qilish</button>
+                    <button className="up-save-btn" onClick={handleSave}>Saqlash</button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           <>
