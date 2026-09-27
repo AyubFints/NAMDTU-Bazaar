@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, ChevronDown, ChevronLeft, ChevronRight, Heart, ShoppingBag, Star, Minus, Plus } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCart } from '../context/CartContext';
@@ -46,7 +46,15 @@ const HERO_SLIDES = [
 ];
 
 const Home = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const categoryFromUrl = queryParams.get('category') || 'all';
+
+  const [activeCategory, setActiveCategory] = useState(categoryFromUrl);
+
+  useEffect(() => {
+    setActiveCategory(categoryFromUrl);
+  }, [categoryFromUrl]);
   const [showMoreCats, setShowMoreCats] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
@@ -145,55 +153,8 @@ const Home = () => {
     }
   };
 
-  const activeCatObj = CATEGORIES_LIST.find(c => c.id === activeCategory) || CATEGORIES_LIST[0];
-  const dropdownCats = CATEGORIES_LIST.filter(c => c.id !== activeCategory);
-
   return (
     <div className="home-page">
-      
-
-      <div className="categories-bar">
-        {/* Mobile: Shows only the currently selected category */}
-        <button className="category-tag highlight mobile-active-tag">
-          {activeCatObj.icon}
-          <span>{activeCatObj.label}</span>
-        </button>
-        
-        {/* Mobile: Dropdown for the rest */}
-        <div className="more-dropdown-wrapper" ref={dropdownRef}>
-          <button 
-            className="category-tag more-btn"
-            onClick={() => setShowMoreCats(!showMoreCats)}
-          >
-            <span>Yana</span>
-            <ChevronDown size={16} className={`more-icon ${showMoreCats ? 'open' : ''}`} />
-          </button>
-          
-          <div className={`more-dropdown-menu ${showMoreCats ? 'open' : ''}`}>
-            {dropdownCats.map(cat => (
-              <button 
-                key={cat.id}
-                className="dropdown-item"
-                onClick={() => { setActiveCategory(cat.id); setShowMoreCats(false); }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop: Shows all categories */}
-        {CATEGORIES_LIST.map(cat => (
-          <button 
-            key={cat.id}
-            className={`category-tag desktop-tag ${activeCategory === cat.id ? 'highlight' : ''}`}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            {cat.icon}
-            <span>{cat.label}</span>
-          </button>
-        ))}
-      </div>
 
       
 

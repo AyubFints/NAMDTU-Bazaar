@@ -4,19 +4,24 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCart } from '../context/CartContext';
-import { Search, User, Heart, ShoppingCart, Menu, X, ChevronDown, ShoppingBag, LogOut } from 'lucide-react';
+import { Search, User, Heart, ShoppingCart, Menu, X, ChevronDown, ShoppingBag, LogOut, ShieldCheck } from 'lucide-react';
 import './Navbar.css';
+import api from '../api/axios';
 
 const Navbar = () => {
   const [langOpen, setLangOpen] = useState(false);
   const [mobileLangOpen, setMobileLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [categories, setCategories] = useState([]);
   const { lang, setLang, t } = useLanguage();
   const { user, openLoginModal } = useAuth();
   const { favorites } = useFavorites();
   const { getCartCount } = useCart();
   const menuRef = useRef(null);
   const langRef = useRef(null);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   const languages = {
     uz: { code: 'uz', name: "O'zbek", flagUrl: 'https://flagcdn.com/w40/uz.png' },
@@ -26,7 +31,7 @@ const Navbar = () => {
 
   const activeLangConfig = languages[lang];
 
-  // Close desktop lang dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (langRef.current && !langRef.current.contains(e.target)) {
@@ -36,6 +41,9 @@ const Navbar = () => {
         setMenuOpen(false);
         setMobileLangOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchFocused(false);
+      }
     };
     
     const handleScroll = () => {
@@ -43,6 +51,17 @@ const Navbar = () => {
       setMenuOpen(false);
       setMobileLangOpen(false);
     };
+
+    const fetchCategories = async () => {
+      try {
+        const { data } = await api.get('/categories');
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Failed to load categories', error);
+      }
+    };
+
+    fetchCategories();
 
     document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -81,11 +100,46 @@ const Navbar = () => {
         </button>
         
         {/* Search */}
-        <div className="navbar-search">
-          <input type="text" placeholder={t('searchPlaceholder')} className="search-input" />
-          <button className="search-btn">
-            <Search size={20} />
-          </button>
+        <div className="navbar-search-wrapper" ref={searchRef}>
+          <div className="navbar-search">
+            <input 
+              type="text" 
+              placeholder={t('searchPlaceholder')} 
+              className="search-input" 
+              onFocus={() => setSearchFocused(true)}
+            />
+            <button className="search-btn">
+              <Search size={20} />
+            </button>
+          </div>
+          
+          {/* Categories Dropdown */}
+          <div className={`search-categories-dropdown ${searchFocused ? 'show' : ''}`}>
+            <div className="search-categories-scroll">
+              <button 
+                className="category-btn active" 
+                onClick={() => {
+                  setSearchFocused(false);
+                  navigate('/?category=all');
+                }}
+              >
+                <ShieldCheck size={16} style={{marginRight: '6px'}} />
+                Barchasi
+              </button>
+              {categories.map((cat, idx) => (
+                <button 
+                  key={idx} 
+                  className="category-btn" 
+                  onClick={() => {
+                    setSearchFocused(false);
+                    navigate(`/?category=${encodeURIComponent(cat.name || cat)}`);
+                  }}
+                >
+                  {cat.name || cat}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Desktop nav links */}
