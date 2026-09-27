@@ -27,7 +27,7 @@ const UserProfile = () => {
 
   // Parse existing user name if available
   useEffect(() => {
-    if (user?.name && !isDirty) {
+    if (user?.name && user.name !== 'Foydalanuvchi' && !isDirty) {
       const parts = user.name.split(' ');
       if (parts.length > 1) {
         setFormData(prev => ({ ...prev, lastName: parts[0], firstName: parts.slice(1).join(' ') }));
@@ -113,7 +113,7 @@ const UserProfile = () => {
       {/* LEFT SIDEBAR */}
       <aside className="up-sidebar">
         <div className="up-bonus-card">
-          {user?.name && <div className="up-bonus-name">{user.name}</div>}
+          {(user?.name && user.name !== 'Foydalanuvchi') && <div className="up-bonus-name">{user.name}</div>}
           <div className="up-bonus-phone">{user?.phone || '+998 00 000 00 00'}</div>
           <div className="up-bonus-inner" onClick={handleBonusClick}>
             <div className="up-bonus-text">

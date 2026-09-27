@@ -174,7 +174,7 @@ const Navbar = () => {
                 ) : (
                   <User size={22} />
                 )}
-                <span>{user.name || 'Profil'}</span>
+                <span>{(user.name && user.name !== 'Foydalanuvchi') ? user.name : 'Profil'}</span>
               </Link>
             </div>
           ) : (
@@ -252,7 +252,7 @@ const Navbar = () => {
             {user ? (
               <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="mobile-link" onClick={() => setMenuOpen(false)}>
                 <User size={22} />
-                <span>{user.name || 'Profil'}</span>
+                <span>{(user.name && user.name !== 'Foydalanuvchi') ? user.name : 'Profil'}</span>
               </Link>
             ) : (
               <button className="mobile-link login-btn-nav" onClick={() => {setMenuOpen(false); openLoginModal();}} style={{background:"transparent", border:"none", width:"100%", textAlign:"left", cursor:"pointer", color:"#fff"}}>
