@@ -847,10 +847,10 @@ const AdminPanel = () => {
               {products.filter(p => p.status === 'pending').length === 0 ? (
                 <p className="admin-empty-text">Hozircha tasdiq kutayotgan mahsulotlar yo'q.</p>
               ) : (
-                <div className="admin-products-grid">
+                <div className="admin-pending-grid">
                   {products.filter(p => p.status === 'pending').map(product => (
-                    <div key={product.id} className="admin-product-card">
-                      <div className="admin-product-img-wrap">
+                    <div key={product.id} className="admin-pending-card">
+                      <div className="admin-pending-img-wrap">
                         {product.images && product.images.length > 0 ? (
                           <img src={product.images[0]} alt={product.name} />
                         ) : (
@@ -858,21 +858,29 @@ const AdminPanel = () => {
                         )}
                         <span className="admin-product-badge pending">Kutmoqda</span>
                       </div>
-                      <div className="admin-product-info">
-                        <h4>{product.name}</h4>
-                        <div className="admin-product-category">{product.category}</div>
-                        <div className="admin-product-price">
-                          <strong>{formatPrice(product.price)}</strong>
+                      <div className="admin-pending-info">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <h4 className="admin-pending-title">{product.name}</h4>
+                            <span className="admin-pending-category">{product.category}</span>
+                          </div>
+                          <div className="admin-pending-price">{formatPrice(product.price)}</div>
                         </div>
-                        <p style={{fontSize: '12px', color: '#64748b', marginTop: '5px'}}>
-                          <strong>Foydalanuvchi:</strong> {product.creatorName} ({product.creatorPhone})
-                        </p>
                         
-                        <div className="admin-product-actions" style={{display: 'flex', gap: '8px', marginTop: '15px'}}>
-                          <button className="admin-save-btn" style={{flex: 1, padding: '8px', fontSize: '13px'}} onClick={() => handleApproveProduct(product.id)}>
+                        <div className="admin-pending-user">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                            <strong style={{ color: '#0f172a' }}>Do'kon egasi:</strong> {product.creatorName}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <strong style={{ color: '#0f172a' }}>Telefon:</strong> {product.creatorPhone}
+                          </div>
+                        </div>
+                        
+                        <div className="admin-pending-actions">
+                          <button className="btn-approve-modern" onClick={() => handleApproveProduct(product.id)}>
                             Tasdiqlash
                           </button>
-                          <button className="admin-delete-btn" style={{flex: 1, padding: '8px', fontSize: '13px'}} onClick={() => handleRejectProduct(product.id)}>
+                          <button className="btn-reject-modern" onClick={() => handleRejectProduct(product.id)}>
                             Rad etish
                           </button>
                         </div>
