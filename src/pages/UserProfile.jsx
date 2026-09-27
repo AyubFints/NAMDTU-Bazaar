@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { X, ChevronRight, FileText } from 'lucide-react';
+import CustomDatePicker from '../components/CustomDatePicker';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -133,7 +134,7 @@ const UserProfile = () => {
               </div>
               <div className="up-form-group">
                 <label>Tug'ilgan sana</label>
-                <input type="date" value={formData.birthDate} onChange={(e) => handleInputChange('birthDate', e.target.value)} />
+                <CustomDatePicker value={formData.birthDate} onChange={(val) => handleInputChange('birthDate', val)} />
               </div>
               <div className="up-form-group">
                 <label>Jins</label>
