@@ -42,7 +42,7 @@ const UserProfile = () => {
   const [myProducts, setMyProducts] = useState([]);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [productFormData, setProductFormData] = useState({
-    name: '', price: '', oldPrice: '', category: '', description: '', image: null,
+    name: '', price: '', oldPrice: '', category: '', description: '', images: [],
     cardNumber: '', cardHolderName: '', cardType: 'uzcard'
   });
 
@@ -152,7 +152,7 @@ const UserProfile = () => {
         oldPrice: productFormData.oldPrice || null,
         category: productFormData.category,
         description: productFormData.description,
-        images: productFormData.image ? [productFormData.image] : [],
+        images: productFormData.images,
         cardNumber: productFormData.cardNumber,
         cardHolderName: productFormData.cardHolderName,
         cardType: productFormData.cardType,
@@ -160,7 +160,7 @@ const UserProfile = () => {
       });
       setMyProducts([...myProducts, data]);
       setProductModalOpen(false);
-      setProductFormData({ name: '', price: '', oldPrice: '', category: '', description: '', image: null, cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
+      setProductFormData({ name: '', price: '', oldPrice: '', category: '', description: '', images: [], cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
       alert("Tavar muvaffaqiyatli jo'natildi! Admin tasdiqlashi kutilmoqda.");
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
@@ -168,14 +168,26 @@ const UserProfile = () => {
   };
 
   const handleProductImage = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const remainingSlots = 5 - productFormData.images.length;
+    const filesToProcess = files.slice(0, remainingSlots);
+
+    filesToProcess.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProductFormData({ ...productFormData, image: reader.result });
+        setProductFormData(prev => ({ ...prev, images: [...prev.images, reader.result] }));
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const removeProductImage = (index) => {
+    setProductFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   // Parse existing user name if available
@@ -315,13 +327,26 @@ const UserProfile = () => {
                   </select>
                 </div>
                 <div className="creative-input-group">
-                  <label>Rasm</label>
+                  <label>Rasm ({productFormData.images.length}/5)</label>
                   <div className="creative-file-input">
-                    <input type="file" accept="image/*" onChange={handleProductImage} />
-                    <span>{productFormData.image ? 'Yuklandi ✓' : 'Fayl tanlash'}</span>
+                    <input type="file" accept="image/*" multiple onChange={handleProductImage} disabled={productFormData.images.length >= 5} />
+                    <span>{productFormData.images.length >= 5 ? 'Joy to\'ldi' : 'Fayl tanlash'}</span>
                   </div>
                 </div>
               </div>
+              
+              {productFormData.images.length > 0 && (
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '-5px', marginBottom: '15px' }}>
+                  {productFormData.images.map((img, i) => (
+                    <div key={i} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                      <img src={img} alt={`Preview ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button type="button" onClick={() => removeProductImage(i)} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="creative-input-group" style={{ marginTop: '15px' }}>
                 <label>Ta'rif (qisqacha)</label>
