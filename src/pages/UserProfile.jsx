@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { X, ChevronRight, FileText } from 'lucide-react';
+import { X, ChevronRight, FileText, Loader2 } from 'lucide-react';
 import CustomDatePicker from '../components/CustomDatePicker';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState('Buyurtmalarim');
   const [activeTab, setActiveTab] = useState('Faol');
@@ -23,6 +23,19 @@ const UserProfile = () => {
   });
   const [isDirty, setIsDirty] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Parse existing user name if available
+  useEffect(() => {
+    if (user?.name && !isDirty) {
+      const parts = user.name.split(' ');
+      if (parts.length > 1) {
+        setFormData(prev => ({ ...prev, lastName: parts[0], firstName: parts.slice(1).join(' ') }));
+      } else {
+        setFormData(prev => ({ ...prev, firstName: user.name }));
+      }
+    }
+  }, [user]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -35,9 +48,18 @@ const UserProfile = () => {
       setShowError(true);
       return;
     }
-    // Perform save logic here
-    setIsDirty(false);
-    setShowError(false);
+    
+    setIsSaving(true);
+    // Simulate API request
+    setTimeout(() => {
+      updateUser({ 
+        name: `${formData.lastName} ${formData.firstName}`.trim(),
+        phone: formData.phone
+      });
+      setIsSaving(false);
+      setIsDirty(false);
+      setShowError(false);
+    }, 1000);
   };
 
   const handleCancel = () => {
@@ -91,6 +113,7 @@ const UserProfile = () => {
       {/* LEFT SIDEBAR */}
       <aside className="up-sidebar">
         <div className="up-bonus-card">
+          {user?.name && <div className="up-bonus-name">{user.name}</div>}
           <div className="up-bonus-phone">{user?.phone || '+998 00 000 00 00'}</div>
           <div className="up-bonus-inner" onClick={handleBonusClick}>
             <div className="up-bonus-text">
@@ -166,8 +189,10 @@ const UserProfile = () => {
                 {showError && <span className="up-error-msg">Iltimos qolgan joylarni ham to'ldiring!</span>}
                 {isDirty && (
                   <div className="up-form-actions">
-                    <button className="up-cancel-btn" onClick={handleCancel}>Bekor qilish</button>
-                    <button className="up-save-btn" onClick={handleSave}>Saqlash</button>
+                    <button className="up-cancel-btn" onClick={handleCancel} disabled={isSaving}>Bekor qilish</button>
+                    <button className="up-save-btn" onClick={handleSave} disabled={isSaving}>
+                      {isSaving ? <Loader2 size={18} className="spin-icon" style={{animation: 'spin 1s linear infinite'}} /> : 'Saqlash'}
+                    </button>
                   </div>
                 )}
               </div>

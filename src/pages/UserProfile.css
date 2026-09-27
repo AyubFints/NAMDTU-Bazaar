@@ -23,7 +23,7 @@
   margin-bottom: 24px;
 }
 
-.up-bonus-phone {
+.up-bonus-name {\n  font-size: 20px;\n  font-weight: bold;\n  margin-bottom: 4px;\n}\n\n.up-bonus-phone {
   font-size: 16px;
   font-weight: 400;
   margin-bottom: 24px;
