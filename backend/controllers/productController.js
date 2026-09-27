@@ -120,3 +120,12 @@ exports.rejectProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getMyProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll({ where: { creatorPhone: req.user.phone } });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

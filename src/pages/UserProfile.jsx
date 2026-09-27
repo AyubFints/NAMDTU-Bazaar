@@ -38,16 +38,45 @@ const UserProfile = () => {
   });
   const [categories, setCategories] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
+  const [unseenApproved, setUnseenApproved] = useState(false);
+  
+  useEffect(() => {
+    const approvedApps = myApplications.filter(a => a.status === 'approved').length;
+    const approvedProds = myProducts.filter(p => p.status === 'approved').length;
+    const totalApproved = approvedApps + approvedProds;
+    const lastSeen = parseInt(localStorage.getItem('lastSeenApprovedCount') || '0', 10);
+    if (totalApproved > lastSeen && activeMenu !== "Do'kon ochish") {
+      setUnseenApproved(true);
+    }
+  }, [myApplications, myProducts, activeMenu]);
+
+  const handleStoreTabClick = () => {
+    setActiveMenu("Do'kon ochish");
+    const approvedApps = myApplications.filter(a => a.status === 'approved').length;
+    const approvedProds = myProducts.filter(p => p.status === 'approved').length;
+    localStorage.setItem('lastSeenApprovedCount', (approvedApps + approvedProds).toString());
+    setUnseenApproved(false);
+  };
+  
+  // Product state
+  const [myProducts, setMyProducts] = useState([]);
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [productFormData, setProductFormData] = useState({
+    name: '', price: '', category: '', description: '', image: null,
+    cardNumber: '', cardHolderName: '', cardType: 'uzcard'
+  });
   
   useEffect(() => {
     const fetchStoreData = async () => {
       try {
-        const [catsRes, appsRes] = await Promise.all([
+        const [catsRes, appsRes, prodsRes] = await Promise.all([
           api.get('/categories'),
-          api.get('/store-applications/my-applications')
+          api.get('/store-applications/my-applications'),
+          api.get('/products/my-products')
         ]);
         setCategories(catsRes.data);
         setMyApplications(appsRes.data);
+        setMyProducts(prodsRes.data);
       } catch (error) {
         console.error('Failed to load store application data:', error);
       }
@@ -110,6 +139,44 @@ const UserProfile = () => {
       customCategory: customCat
     });
     setStoreModalOpen(true);
+  };
+
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+    if (!productFormData.name || !productFormData.price || !productFormData.category) {
+      alert("Majburiy maydonlarni to'ldiring!");
+      return;
+    }
+    try {
+      const { data } = await api.post('/products', {
+        name: productFormData.name,
+        price: productFormData.price,
+        category: productFormData.category,
+        description: productFormData.description,
+        images: productFormData.image ? [productFormData.image] : [],
+        cardNumber: productFormData.cardNumber,
+        cardHolderName: productFormData.cardHolderName,
+        cardType: productFormData.cardType,
+        stock: '1'
+      });
+      setMyProducts([...myProducts, data]);
+      setProductModalOpen(false);
+      setProductFormData({ name: '', price: '', category: '', description: '', image: null, cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
+      alert("Tavar muvaffaqiyatli jo'natildi! Admin tasdiqlashi kutilmoqda.");
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleProductImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProductFormData({ ...productFormData, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Parse existing user name if available
@@ -201,6 +268,72 @@ const UserProfile = () => {
         </div>
       )}
 
+      {/* Product Creation Modal */}
+      {productModalOpen && (
+        <div className="up-modal-overlay">
+          <div className="up-modal" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <button className="up-modal-close" onClick={() => setProductModalOpen(false)}>
+              <X size={20} />
+            </button>
+            <h3 style={{ marginBottom: '10px' }}>Tavar yaratish</h3>
+            
+            <div style={{ background: '#eff6ff', borderLeft: '4px solid #3b82f6', padding: '12px', borderRadius: '4px', marginBottom: '20px', fontSize: '13px', color: '#1e40af' }}>
+              Admin tavarni qachonki tasdiqlasa, keyin tavar NAMDTU Bazaar dasturiga qo'shiladi va o'zingizning savdoyingizni boshlaysiz.
+            </div>
+
+            <form onSubmit={handleProductSubmit}>
+              <div className="up-form-group">
+                <label>Mahsulot nomi <span className="req">*</span></label>
+                <input type="text" className="up-field" placeholder="Masalan: Qishki kurtka" value={productFormData.name} onChange={(e) => setProductFormData({...productFormData, name: e.target.value})} required />
+              </div>
+              <div className="up-form-group">
+                <label>Narxi (so'm) <span className="req">*</span></label>
+                <input type="number" className="up-field" placeholder="Masalan: 150000" value={productFormData.price} onChange={(e) => setProductFormData({...productFormData, price: e.target.value})} required />
+              </div>
+              <div className="up-form-group">
+                <label>Kategoriya <span className="req">*</span></label>
+                <select className="up-field" value={productFormData.category} onChange={(e) => setProductFormData({...productFormData, category: e.target.value})} required>
+                  <option value="">-- Tanlang --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="up-form-group">
+                <label>Mahsulot ta'rifi</label>
+                <textarea className="up-field" style={{ width: '100%', padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0', minHeight: '80px' }} value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
+              </div>
+
+              <div style={{ padding: '15px', border: '1px solid #e2e8f0', borderRadius: '12px', background: '#f8fafc', marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px' }}>Karta ma'lumotlari</h4>
+                <div className="up-form-group">
+                  <label>Karta raqami</label>
+                  <input type="text" className="up-field" placeholder="8600 1234..." value={productFormData.cardNumber} onChange={(e) => setProductFormData({...productFormData, cardNumber: e.target.value})} />
+                </div>
+                <div className="up-form-group">
+                  <label>Karta egasi</label>
+                  <input type="text" className="up-field" placeholder="Ism familiya" value={productFormData.cardHolderName} onChange={(e) => setProductFormData({...productFormData, cardHolderName: e.target.value})} />
+                </div>
+                <div className="up-form-group">
+                  <label>Karta turi</label>
+                  <input type="text" className="up-field" placeholder="UZCARD, HUMO" value={productFormData.cardType} onChange={(e) => setProductFormData({...productFormData, cardType: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="up-form-group">
+                <label>Rasm yuklash</label>
+                <input type="file" accept="image/*" onChange={handleProductImage} style={{ display: 'block', width: '100%', padding: '10px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }} />
+                {productFormData.image && (
+                  <img src={productFormData.image} alt="Preview" style={{ height: '80px', marginTop: '10px', borderRadius: '8px' }} />
+                )}
+              </div>
+
+              <button type="submit" className="up-primary-btn" style={{ width: '100%' }}>Jo'natish</button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* LEFT SIDEBAR */}
       <aside className="up-sidebar">
         <div className="up-bonus-card">
@@ -222,9 +355,9 @@ const UserProfile = () => {
           </button>
           <button className={`up-nav-item ${activeMenu === "Ma'lumotlarim" ? 'active' : ''}`} onClick={() => setActiveMenu("Ma'lumotlarim")}>Ma'lumotlarim</button>
           <button className={`up-nav-item ${activeMenu === 'Ijtimoiy promokodlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Ijtimoiy promokodlar')}>Ijtimoiy promokodlar</button>
-          <button className={`up-nav-item ${activeMenu === "Do'kon ochish" ? 'active' : ''}`} onClick={() => setActiveMenu("Do'kon ochish")}>
+          <button className={`up-nav-item ${activeMenu === "Do'kon ochish" ? 'active' : ''}`} onClick={handleStoreTabClick}>
             Do'kon ochish
-            {myApplications.some(app => app.status === 'approved') && (
+            {unseenApproved && (
               <span style={{ background: '#ef4444', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>1</span>
             )}
           </button>
@@ -309,35 +442,76 @@ const UserProfile = () => {
               {myApplications.length > 0 ? (
                 <div className="store-apps-list" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                   {myApplications.map(app => (
-                    <div key={app.id} className="store-app-card">
-                      <div className="store-app-header">
-                        <h3>{app.storeName}</h3>
-                        <span className={`store-app-badge ${app.status}`}>
-                          {app.status === 'approved' ? 'Qabul qilindi' : app.status === 'rejected' ? 'Qabul qilinmadi' : 'Kutilmoqda'}
-                        </span>
-                      </div>
-                      
-                      <div className="store-app-body">
-                        <p><strong>Boshliq:</strong> <span>{app.ownerName}</span></p>
-                        <p><strong>Nomer:</strong> <span>{app.phone}</span></p>
-                        <p><strong>Kategoriyalar:</strong> <span>{app.categories?.join(', ')}</span></p>
-                      </div>
-                      
-                      {app.status === 'pending' && (
-                        <div className="store-app-actions">
-                          <button onClick={() => openEditStoreApp(app)} className="edit-btn">
-                            <Edit2 size={16}/> O'zgartirish
-                          </button>
-                          <button onClick={() => handleDeleteStoreApp(app.id)} className="delete-btn">
-                            <Trash2 size={16}/> O'chirish
-                          </button>
+                    <div key={app.id}>
+                      <div className="store-app-card">
+                        <div className="store-app-header">
+                          <h3>{app.storeName}</h3>
+                          <span className={`store-app-badge ${app.status}`}>
+                            {app.status === 'approved' ? 'Qabul qilindi' : app.status === 'rejected' ? 'Qabul qilinmadi' : 'Kutilmoqda'}
+                          </span>
                         </div>
-                      )}
-                      
-                      {app.status === 'pending' && (
-                        <div className="store-app-footer">
-                          <span className="pulsing-dot"></span>
-                          Ko'rib chiqilmoqda. Ertagacha natijani aytamiz.
+                        
+                        <div className="store-app-body">
+                          <p><strong>Boshliq:</strong> <span>{app.ownerName}</span></p>
+                          <p><strong>Nomer:</strong> <span>{app.phone}</span></p>
+                          <p><strong>Kategoriyalar:</strong> <span>{app.categories?.join(', ')}</span></p>
+                        </div>
+                        
+                        {app.status === 'pending' && (
+                          <div className="store-app-actions">
+                            <button onClick={() => openEditStoreApp(app)} className="edit-btn">
+                              <Edit2 size={16}/> O'zgartirish
+                            </button>
+                            <button onClick={() => handleDeleteStoreApp(app.id)} className="delete-btn">
+                              <Trash2 size={16}/> O'chirish
+                            </button>
+                          </div>
+                        )}
+                        
+                        {app.status === 'pending' && (
+                          <div className="store-app-footer">
+                            <span className="pulsing-dot"></span>
+                            Ko'rib chiqilmoqda. Ertagacha natijani aytamiz.
+                          </div>
+                        )}
+
+                        {app.status === 'approved' && (
+                          <div style={{ marginTop: '20px', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>
+                            <button className="up-primary-btn" style={{ width: '100%' }} onClick={() => setProductModalOpen(true)}>
+                              Tavar yaratish
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Display Products of the User */}
+                      {app.status === 'approved' && myProducts.length > 0 && (
+                        <div style={{ marginTop: '20px' }}>
+                          <h3 style={{ color: '#0a1052', marginBottom: '15px' }}>Sizning tavarlaringiz</h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                            {myProducts.map(prod => (
+                              <div key={prod.id} style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                                <div style={{ height: '120px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  {prod.images && prod.images.length > 0 ? (
+                                    <img src={prod.images[0]} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                  ) : (
+                                    <span style={{ color: '#94a3b8' }}>Rasm yo'q</span>
+                                  )}
+                                </div>
+                                <div style={{ padding: '12px' }}>
+                                  <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#1e293b' }}>{prod.name}</h4>
+                                  <p style={{ margin: '0 0 10px 0', fontSize: '13px', fontWeight: 'bold', color: '#2563eb' }}>{prod.price} so'm</p>
+                                  <span style={{ 
+                                    padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: '600',
+                                    background: prod.status === 'approved' ? '#dcfce7' : prod.status === 'rejected' ? '#fee2e2' : '#fef9c3',
+                                    color: prod.status === 'approved' ? '#166534' : prod.status === 'rejected' ? '#991b1b' : '#854d0e'
+                                  }}>
+                                    {prod.status === 'approved' ? 'Tasdiqlangan' : prod.status === 'rejected' ? 'Rad etilgan' : 'Ko\'rib chiqilmoqda'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>

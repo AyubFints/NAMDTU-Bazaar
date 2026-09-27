@@ -7,9 +7,12 @@ const {
   updateProduct,
   deleteProduct,
   approveProduct,
-  rejectProduct
+  rejectProduct,
+  getMyProducts
 } = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
+
+router.route('/my-products').get(protect, getMyProducts);
 
 router.route('/')
   .get(getProducts)
