@@ -422,15 +422,16 @@
   color: #1e293b;
 }
 .up-save-btn {
-  background: #6200ea; /* Purple as in image */
+  background: rgb(10, 16, 82);
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 10px 24px;
+  padding: 12px 32px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
 .up-save-btn:hover {
-  background: #5000c2;
+  background: rgba(10, 16, 82, 0.9);
 }
