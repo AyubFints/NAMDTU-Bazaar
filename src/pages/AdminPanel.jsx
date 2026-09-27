@@ -1126,32 +1126,31 @@ const AdminPanel = () => {
             
             <div className="orders-grid">
               {storeApps.map(app => (
-                <div key={app.id} className="order-card">
-                  <div className="order-header">
+                <div key={app.id} className="admin-store-card">
+                  <div className="admin-store-header">
                     <h3>{app.storeName}</h3>
-                    <span className={`order-status ${app.status}`}>
+                    <span className={`admin-store-badge ${app.status}`}>
                       {app.status === 'pending' ? 'Kutilmoqda' : app.status === 'approved' ? 'Tasdiqlangan' : 'Rad etilgan'}
                     </span>
                   </div>
                   
-                  <div className="order-details">
-                    <p><strong>Boshliq:</strong> {app.ownerName}</p>
-                    <p><strong>Telefon:</strong> {app.phone}</p>
-                    <p><strong>Sotiladigan mahsulotlar:</strong> {app.categories?.join(', ')}</p>
-                    <p><strong>Sana:</strong> {new Date(app.createdAt).toLocaleString('uz-UZ')}</p>
+                  <div className="admin-store-body">
+                    <p><strong>Boshliq:</strong> <span>{app.ownerName}</span></p>
+                    <p><strong>Telefon:</strong> <span>{app.phone}</span></p>
+                    <p><strong>Sotiladigan mahsulotlar:</strong> <span>{app.categories?.join(', ')}</span></p>
+                    <p><strong>Sana:</strong> <span>{new Date(app.createdAt).toLocaleString('uz-UZ')}</span></p>
                   </div>
                   
                   {app.status === 'pending' && (
-                    <div className="order-actions" style={{ marginTop: '15px', display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                    <div className="admin-store-actions">
                       <button 
-                        className="admin-btn-primary" 
+                        className="btn-approve" 
                         onClick={() => handleUpdateStoreAppStatus(app.id, 'approved')}
-                        style={{ background: '#10b981', color: 'white' }}
                       >
                         Do'kon yaralishini va mahsulot qo'shib sotishga ruxsat berish
                       </button>
                       <button 
-                        className="admin-btn-danger" 
+                        className="btn-reject" 
                         onClick={() => handleUpdateStoreAppStatus(app.id, 'rejected')}
                       >
                         Qabul qilinmadi
