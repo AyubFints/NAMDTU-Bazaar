@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { X, ChevronRight, FileText, Loader2 } from 'lucide-react';
+import { X, ChevronRight, FileText, Loader2, Store, Trash2, Edit2 } from 'lucide-react';
 import CustomDatePicker from '../components/CustomDatePicker';
+import api from '../api/axios';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -24,6 +25,92 @@ const UserProfile = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [showError, setShowError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Store Application states
+  const [storeModalOpen, setStoreModalOpen] = useState(false);
+  const [editingStoreApp, setEditingStoreApp] = useState(null);
+  const [storeAppFormData, setStoreAppFormData] = useState({
+    storeName: '',
+    ownerName: user?.name !== 'Foydalanuvchi' ? user?.name : '',
+    phone: user?.phone || '',
+    category: '',
+    customCategory: ''
+  });
+  const [categories, setCategories] = useState([]);
+  const [myApplications, setMyApplications] = useState([]);
+  
+  useEffect(() => {
+    const fetchStoreData = async () => {
+      try {
+        const [catsRes, appsRes] = await Promise.all([
+          api.get('/categories'),
+          api.get('/store-applications/my-applications')
+        ]);
+        setCategories(catsRes.data);
+        setMyApplications(appsRes.data);
+      } catch (error) {
+        console.error('Failed to load store application data:', error);
+      }
+    };
+    if (user) {
+      fetchStoreData();
+    }
+  }, [user]);
+
+  const handleStoreAppSubmit = async (e) => {
+    e.preventDefault();
+    const { storeName, ownerName, phone, category, customCategory } = storeAppFormData;
+    if (!storeName.trim() || !ownerName.trim() || !phone.trim() || (!category && !customCategory.trim())) {
+      alert("Iltimos, barcha maydonlarni to'ldiring!");
+      return;
+    }
+
+    const finalCategory = category === 'boshqa' ? customCategory : category;
+
+    try {
+      if (editingStoreApp) {
+        const { data } = await api.put(`/store-applications/${editingStoreApp.id}`, {
+          storeName, ownerName, phone, categories: [finalCategory]
+        });
+        setMyApplications(myApplications.map(app => app.id === editingStoreApp.id ? data : app));
+      } else {
+        const { data } = await api.post('/store-applications', {
+          storeName, ownerName, phone, categories: [finalCategory]
+        });
+        setMyApplications([...myApplications, data]);
+      }
+      setStoreModalOpen(false);
+      setEditingStoreApp(null);
+      setStoreAppFormData({ storeName: '', ownerName: user?.name !== 'Foydalanuvchi' ? user?.name : '', phone: user?.phone || '', category: '', customCategory: '' });
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleDeleteStoreApp = async (id) => {
+    if (window.confirm("Rostdan ham o'chirmoqchimisiz?")) {
+      try {
+        await api.delete(`/store-applications/${id}`);
+        setMyApplications(myApplications.filter(app => app.id !== id));
+      } catch (error) {
+        alert("Xatolik: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const openEditStoreApp = (app) => {
+    setEditingStoreApp(app);
+    const cat = categories.find(c => c.name === app.categories?.[0]) ? app.categories[0] : 'boshqa';
+    const customCat = cat === 'boshqa' ? app.categories?.[0] : '';
+    setStoreAppFormData({
+      storeName: app.storeName,
+      ownerName: app.ownerName,
+      phone: app.phone,
+      category: cat,
+      customCategory: customCat
+    });
+    setStoreModalOpen(true);
+  };
 
   // Parse existing user name if available
   useEffect(() => {
@@ -135,7 +222,12 @@ const UserProfile = () => {
           </button>
           <button className={`up-nav-item ${activeMenu === "Ma'lumotlarim" ? 'active' : ''}`} onClick={() => setActiveMenu("Ma'lumotlarim")}>Ma'lumotlarim</button>
           <button className={`up-nav-item ${activeMenu === 'Ijtimoiy promokodlar' ? 'active' : ''}`} onClick={() => setActiveMenu('Ijtimoiy promokodlar')}>Ijtimoiy promokodlar</button>
-          <button className={`up-nav-item ${activeMenu === "Do'kon ochish" ? 'active' : ''}`} onClick={() => setActiveMenu("Do'kon ochish")}>Do'kon ochish</button>
+          <button className={`up-nav-item ${activeMenu === "Do'kon ochish" ? 'active' : ''}`} onClick={() => setActiveMenu("Do'kon ochish")}>
+            Do'kon ochish
+            {myApplications.some(app => app.status === 'approved') && (
+              <span style={{ background: '#ef4444', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>1</span>
+            )}
+          </button>
         </nav>
       </aside>
 
@@ -205,9 +297,57 @@ const UserProfile = () => {
           </div>
         ) : activeMenu === "Do'kon ochish" ? (
           <div className="up-settings-wrapper">
-            <h2>Do'kon ochish</h2>
+            <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Do'kon ochish
+              <button className="up-primary-btn" onClick={() => setStoreModalOpen(true)}>Do'kon yaratish</button>
+            </h2>
             <div className="up-form-group" style={{ marginTop: '20px' }}>
-              <p>Tez orada bu yerda do'kon yaratish imkoniyati qo'shiladi...</p>
+              <p style={{ color: '#0a1052', fontWeight: '500', marginBottom: '20px' }}>
+                Do'kon yaratib o'zingizni tavaringizni NAMDTU Bazaar dasturida sotishingiz mumkin
+              </p>
+              
+              {myApplications.length > 0 ? (
+                <div className="store-apps-list" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {myApplications.map(app => (
+                    <div key={app.id} style={{ border: '1px solid #e2e8f0', padding: '15px', borderRadius: '12px', background: '#f8fafc' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <h3 style={{ margin: '0 0 10px 0', color: '#0a1052' }}>{app.storeName}</h3>
+                        <span style={{ 
+                          padding: '4px 10px', 
+                          borderRadius: '20px', 
+                          fontSize: '12px', 
+                          fontWeight: 'bold',
+                          background: app.status === 'approved' ? '#dcfce7' : app.status === 'rejected' ? '#fee2e2' : '#fef9c3',
+                          color: app.status === 'approved' ? '#166534' : app.status === 'rejected' ? '#991b1b' : '#854d0e'
+                        }}>
+                          {app.status === 'approved' ? 'Qabul qilindi' : app.status === 'rejected' ? 'Qabul qilinmadi' : 'Kutilmoqda'}
+                        </span>
+                      </div>
+                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Boshliq:</strong> {app.ownerName}</p>
+                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Nomer:</strong> {app.phone}</p>
+                      <p style={{ margin: '5px 0', fontSize: '14px' }}><strong>Kategoriyalar:</strong> {app.categories?.join(', ')}</p>
+                      
+                      {app.status === 'pending' && (
+                        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                          <button onClick={() => openEditStoreApp(app)} style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Edit2 size={14}/> O'zgartirish</button>
+                          <button onClick={() => handleDeleteStoreApp(app.id)} style={{ padding: '6px 12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}><Trash2 size={14}/> O'chirish</button>
+                        </div>
+                      )}
+                      
+                      {app.status === 'pending' && (
+                        <p style={{ marginTop: '15px', fontSize: '13px', color: '#64748b', fontStyle: 'italic' }}>
+                          Ko'rib chiqilmoqda. Ertagacha natijani aytamiz.
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: '40px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                  <Store size={48} color="#94a3b8" style={{ marginBottom: '15px' }} />
+                  <p style={{ color: '#64748b' }}>Hali arizalar yo'q. "Do'kon yaratish" tugmasini bosing.</p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -250,6 +390,82 @@ const UserProfile = () => {
           </>
         )}
       </main>
+
+      {storeModalOpen && (
+        <div className="up-modal-overlay" onClick={() => { setStoreModalOpen(false); setEditingStoreApp(null); }}>
+          <div className="up-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%', textAlign: 'left' }}>
+            <button className="up-modal-close" onClick={() => { setStoreModalOpen(false); setEditingStoreApp(null); }}>
+              <X size={20} />
+            </button>
+            <h2 style={{ marginBottom: '20px', color: '#0a1052' }}>{editingStoreApp ? 'Arizani tahrirlash' : 'Do\'kon yaratish'}</h2>
+            <form onSubmit={handleStoreAppSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="up-field">
+                <label>Do'kon nomi</label>
+                <input 
+                  type="text" 
+                  value={storeAppFormData.storeName} 
+                  onChange={e => setStoreAppFormData({...storeAppFormData, storeName: e.target.value})} 
+                  required 
+                  className={storeAppFormData.storeName ? 'filled' : ''}
+                />
+              </div>
+              <div className="up-field">
+                <label>Do'kon egasi ismi</label>
+                <input 
+                  type="text" 
+                  value={storeAppFormData.ownerName} 
+                  onChange={e => setStoreAppFormData({...storeAppFormData, ownerName: e.target.value})} 
+                  required 
+                  className={storeAppFormData.ownerName ? 'filled' : ''}
+                />
+              </div>
+              <div className="up-field">
+                <label>Telefon raqam</label>
+                <input 
+                  type="text" 
+                  value={storeAppFormData.phone} 
+                  onChange={e => setStoreAppFormData({...storeAppFormData, phone: e.target.value})} 
+                  required 
+                  className={storeAppFormData.phone ? 'filled' : ''}
+                />
+              </div>
+              <div className="up-field">
+                <label>Qanday turdagi tovarlar sotiladi?</label>
+                <select 
+                  value={storeAppFormData.category} 
+                  onChange={e => setStoreAppFormData({...storeAppFormData, category: e.target.value})} 
+                  required
+                  className={storeAppFormData.category ? 'filled' : ''}
+                >
+                  <option value="">Tanlang...</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                  <option value="boshqa">Boshqa turdagi tovar sotish</option>
+                </select>
+              </div>
+              
+              {storeAppFormData.category === 'boshqa' && (
+                <div className="up-field">
+                  <label>Tovarlar turini kiriting</label>
+                  <input 
+                    type="text" 
+                    value={storeAppFormData.customCategory} 
+                    onChange={e => setStoreAppFormData({...storeAppFormData, customCategory: e.target.value})} 
+                    required 
+                    placeholder="Masalan: Uy anjomlari"
+                    className={storeAppFormData.customCategory ? 'filled' : ''}
+                  />
+                </div>
+              )}
+              
+              <button type="submit" className="up-primary-btn" style={{ marginTop: '10px' }}>
+                Tasdiqlash
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

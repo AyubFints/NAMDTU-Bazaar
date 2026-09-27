@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Package, FolderPlus, ShoppingBag, Plus, Trash2, Image, Save, X, Edit2 } from 'lucide-react';
+import { LogOut, Package, FolderPlus, ShoppingBag, Plus, Trash2, Image, Save, X, Edit2, Store } from 'lucide-react';
 import api from '../api/axios';
 import './AdminPanel.css';
 const HERO_SLIDES = [];
@@ -75,6 +75,22 @@ const AdminPanel = () => {
       }
     };
     fetchOrders();
+  }, []);
+
+  // Store Applications list
+  const [storeApps, setStoreApps] = useState([]);
+  const newStoreAppsCount = storeApps.filter(app => app.status === 'pending').length;
+
+  useEffect(() => {
+    const fetchStoreApps = async () => {
+      try {
+        const { data } = await api.get('/store-applications');
+        setStoreApps(data);
+      } catch (error) {
+        console.error("Failed to load store applications", error);
+      }
+    };
+    fetchStoreApps();
   }, []);
 
   // Banners list
@@ -420,6 +436,16 @@ const AdminPanel = () => {
   };
 
 
+  const handleUpdateStoreAppStatus = async (id, status) => {
+    try {
+      const { data } = await api.put(`/store-applications/${id}/status`, { status });
+      setStoreApps(storeApps.map(app => app.id === id ? data : app));
+      showSuccess(status === 'approved' ? "Do'kon ochishga ruxsat berildi!" : "Ariza rad etildi!");
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
+  };
+
   // Price formatter
   const handlePriceChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -498,6 +524,18 @@ const AdminPanel = () => {
               )}
             </div>
             <span>Buyurtmalar</span>
+          </button>
+          <button
+            className={`admin-nav-item ${activeTab === 'store-apps' ? 'active' : ''}`}
+            onClick={() => setActiveTab('store-apps')}
+          >
+            <div style={{ position: 'relative', display: 'flex' }}>
+              <Store size={20} />
+              {newStoreAppsCount > 0 && (
+                <span className="admin-nav-badge">{newStoreAppsCount}</span>
+              )}
+            </div>
+            <span>Do'kon arizalari</span>
           </button>
           <button
             className={`admin-nav-item ${activeTab === 'pending' ? 'active' : ''}`}
@@ -1078,6 +1116,61 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+        {/* ===== STORE APPS TAB ===== */}
+        {activeTab === 'store-apps' && (
+          <div className="admin-tab-content">
+            <div className="admin-page-header">
+              <h1>Do'kon ochmoqchi bo'lganlar</h1>
+              <p>Yangi do'kon ochish bo'yicha arizalarni ko'rib chiqing va tasdiqlang</p>
+            </div>
+            
+            <div className="orders-grid">
+              {storeApps.map(app => (
+                <div key={app.id} className="order-card">
+                  <div className="order-header">
+                    <h3>{app.storeName}</h3>
+                    <span className={`order-status ${app.status}`}>
+                      {app.status === 'pending' ? 'Kutilmoqda' : app.status === 'approved' ? 'Tasdiqlangan' : 'Rad etilgan'}
+                    </span>
+                  </div>
+                  
+                  <div className="order-details">
+                    <p><strong>Boshliq:</strong> {app.ownerName}</p>
+                    <p><strong>Telefon:</strong> {app.phone}</p>
+                    <p><strong>Sotiladigan mahsulotlar:</strong> {app.categories?.join(', ')}</p>
+                    <p><strong>Sana:</strong> {new Date(app.createdAt).toLocaleString('uz-UZ')}</p>
+                  </div>
+                  
+                  {app.status === 'pending' && (
+                    <div className="order-actions" style={{ marginTop: '15px', display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                      <button 
+                        className="admin-btn-primary" 
+                        onClick={() => handleUpdateStoreAppStatus(app.id, 'approved')}
+                        style={{ background: '#10b981', color: 'white' }}
+                      >
+                        Do'kon yaralishini va mahsulot qo'shib sotishga ruxsat berish
+                      </button>
+                      <button 
+                        className="admin-btn-danger" 
+                        onClick={() => handleUpdateStoreAppStatus(app.id, 'rejected')}
+                      >
+                        Qabul qilinmadi
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {storeApps.length === 0 && (
+                <div className="admin-empty-state" style={{ gridColumn: '1 / -1' }}>
+                  <Store size={48} />
+                  <h3>Hozircha arizalar yo'q</h3>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

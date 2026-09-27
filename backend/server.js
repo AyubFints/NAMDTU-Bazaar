@@ -9,6 +9,7 @@ require('./models/Product');
 require('./models/Order');
 require('./models/Category');
 require('./models/Banner');
+require('./models/StoreApplication');
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/banners', require('./routes/bannerRoutes'));
+app.use('/api/store-applications', require('./routes/storeRoutes'));
 
 app.get('/', (req, res) => {
   res.send('NAMDTU Bazaar API is running on PostgreSQL');

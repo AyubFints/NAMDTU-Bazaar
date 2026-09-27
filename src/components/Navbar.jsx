@@ -14,6 +14,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [approvedStoreAppCount, setApprovedStoreAppCount] = useState(0);
   const { lang, setLang, t } = useLanguage();
   const { user, openLoginModal } = useAuth();
   const { favorites } = useFavorites();
@@ -82,6 +83,20 @@ const Navbar = () => {
       fetchCategories(1);
     };
     window.addEventListener('categoriesUpdated', handleCategoriesUpdate);
+    
+    // Listen for store app update
+    const fetchApprovedAppsCount = async () => {
+      try {
+        const { data } = await api.get('/store-applications/my-applications');
+        const approvedCount = data.filter(app => app.status === 'approved').length;
+        setApprovedStoreAppCount(approvedCount);
+      } catch (err) { }
+    };
+    if (localStorage.getItem('token')) {
+      fetchApprovedAppsCount();
+    }
+    const handleStoreAppUpdate = () => fetchApprovedAppsCount();
+    window.addEventListener('storeAppUpdated', handleStoreAppUpdate);
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -93,7 +108,9 @@ const Navbar = () => {
       document.removeEventListener('touchstart', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('touchmove', handleScroll);
+      document.removeEventListener('touchmove', handleScroll);
       window.removeEventListener('categoriesUpdated', handleCategoriesUpdate);
+      window.removeEventListener('storeAppUpdated', handleStoreAppUpdate);
     };
   }, []);
 
@@ -172,13 +189,18 @@ const Navbar = () => {
         <nav className="navbar-nav desktop-nav">
           {user ? (
             <div className="user-profile-wrapper">
-              <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="nav-link user-profile-link">
+              <Link to={user.role === 'admin' ? "/admin" : "/profile"} className="nav-link user-profile-link" style={{ position: 'relative' }}>
                 {user.role === 'admin' ? (
                   <div className="avatar-circle">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 ) : (
-                  <User size={22} />
+                  <>
+                    <User size={22} />
+                    {approvedStoreAppCount > 0 && (
+                      <span className="nav-badge" style={{ position: 'absolute', top: '-5px', right: '5px' }}>{approvedStoreAppCount}</span>
+                    )}
+                  </>
                 )}
                 <span>{getFirstName()}</span>
               </Link>
