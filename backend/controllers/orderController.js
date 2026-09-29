@@ -40,6 +40,48 @@ exports.getMyOrders = async (req, res) => {
   }
 };
 
+exports.getMySales = async (req, res) => {
+  try {
+    const myPhone = req.user.phone;
+    
+    // Find all products owned by me
+    const myProducts = await Product.findAll({ where: { creatorPhone: myPhone } });
+    const myProductIds = myProducts.map(p => p.id);
+    
+    if (myProductIds.length === 0) {
+      return res.json([]);
+    }
+
+    const allOrders = await Order.findAll({ order: [['createdAt', 'DESC']] });
+    
+    const mySales = [];
+    allOrders.forEach(order => {
+      // Find items in this order that belong to my products
+      const myItems = order.items.filter(item => {
+        const itemId = item.originalId || item.id;
+        return myProductIds.includes(itemId);
+      });
+      
+      if (myItems.length > 0) {
+        // Only return my items and recalculate total
+        const sellerOrder = {
+           ...order.toJSON(),
+           items: myItems,
+           totalAmount: myItems.reduce((acc, item) => {
+             const price = parseFloat(String(item.price).replace(/\D/g, '')) || 0;
+             return acc + (price * item.quantity);
+           }, 0)
+        };
+        mySales.push(sellerOrder);
+      }
+    });
+
+    res.json(mySales);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.cancelOrder = async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id);

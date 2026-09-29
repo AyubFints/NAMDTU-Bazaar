@@ -15,6 +15,7 @@ const Navbar = () => {
   const [searchFocused, setSearchFocused] = useState(false);
   const [categories, setCategories] = useState([]);
   const [approvedStoreAppCount, setApprovedStoreAppCount] = useState(0);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   const { lang, setLang, t } = useLanguage();
   const { user, openLoginModal } = useAuth();
   const { favorites } = useFavorites();
@@ -86,9 +87,19 @@ const Navbar = () => {
     // Listen for store app update
     const fetchApprovedAppsCount = async () => {
       try {
-        const { data } = await api.get('/store-applications/my-applications');
-        const approvedCount = data.filter(app => app.status === 'approved').length;
-        setApprovedStoreAppCount(approvedCount);
+        const [appsRes, prodsRes] = await Promise.all([
+          api.get('/store-applications/my-applications').catch(() => ({ data: [] })),
+          api.get('/products/my-products').catch(() => ({ data: [] }))
+        ]);
+        const appsCount = (appsRes.data || []).filter(app => app.status === 'approved').length;
+        const prodsCount = (prodsRes.data || []).filter(p => p.status === 'approved').length;
+        const total = appsCount + prodsCount;
+        const lastSeen = parseInt(localStorage.getItem('lastSeenApprovedCount') || '0', 10);
+        if (total > lastSeen) {
+          setApprovedStoreAppCount(total - lastSeen); // Show how many are new
+        } else {
+          setApprovedStoreAppCount(0); // Hide if already seen
+        }
       } catch (err) { }
     };
     if (localStorage.getItem('token')) {
@@ -131,14 +142,17 @@ const Navbar = () => {
       <div className="container navbar-container">
         {/* Logo */}
         <Link to="/" className="navbar-brand">
-          <span>NAMDTU Bazaar</span>
+          <div className="logo-img-wrapper" onClick={(e) => {
+            e.preventDefault();
+            setIsLogoModalOpen(true);
+          }} style={{ cursor: 'pointer' }}>
+            <img src="/logo.jpg" alt="NAMDTU Logo" className="navbar-logo-img" />
+          </div>
+          <div className="navbar-brand-text">
+            <span className="brand-title">NAMDTU</span>
+            <span className="brand-subtitle">Bazaar</span>
+          </div>
         </Link>
-        
-        {/* Catalog button */}
-        <button className="catalog-btn">
-          <Menu size={18} />
-          <span>{t('catalog')}</span>
-        </button>
         
         {/* Search */}
         <div className="navbar-search-wrapper" ref={searchRef}>
@@ -328,10 +342,22 @@ const Navbar = () => {
                   </div>
                 ))}
               </div>
-            </div>
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Logo Modal */}
+      {isLogoModalOpen && (
+        <div className="logo-modal-overlay" onClick={() => setIsLogoModalOpen(false)}>
+          <button className="logo-modal-close" onClick={() => setIsLogoModalOpen(false)}>
+            <X size={24} color="#fff" />
+          </button>
+          <div className="logo-modal-content" onClick={(e) => e.stopPropagation()}>
+            <img src="/logo.jpg" alt="NAMDTU Logo Big" />
+          </div>
+        </div>
+      )}
     </header>
   );
 };

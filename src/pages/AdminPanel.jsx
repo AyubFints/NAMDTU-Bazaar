@@ -267,38 +267,48 @@ const AdminPanel = () => {
   };
 
   // Product Approval Workflow
-  const handleApproveProduct = (id) => {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-    
-    setProducts(products.map(p => p.id === id ? { ...p, status: 'approved' } : p));
-    
-    const newNote = {
-      id: Date.now(),
-      phone: product.creatorPhone,
-      message: `Tabriklaymiz! "${product.name}" mahsulotingiz tasdiqlandi va bo'zorga chiqarildi.`,
-      type: 'approved',
-      date: new Date().toLocaleDateString('uz-UZ')
-    };
-    setNotifications([...notifications, newNote]);
-    showSuccess('Mahsulot tasdiqlandi!');
+  const handleApproveProduct = async (id) => {
+    try {
+      await api.put(`/products/${id}/approve`);
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      
+      setProducts(products.map(p => p.id === id ? { ...p, status: 'approved' } : p));
+      
+      const newNote = {
+        id: Date.now(),
+        phone: product.creatorPhone,
+        message: `Tabriklaymiz! "${product.name}" mahsulotingiz tasdiqlandi va bo'zorga chiqarildi.`,
+        type: 'approved',
+        date: new Date().toLocaleDateString('uz-UZ')
+      };
+      setNotifications([...notifications, newNote]);
+      showSuccess('Mahsulot tasdiqlandi!');
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
-  const handleRejectProduct = (id) => {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-    
-    setProducts(products.filter(p => p.id !== id));
-    
-    const newNote = {
-      id: Date.now(),
-      phone: product.creatorPhone,
-      message: `Afsuski, "${product.name}" mahsulotingiz talablarga javob bermagani uchun rad etildi.`,
-      type: 'rejected',
-      date: new Date().toLocaleDateString('uz-UZ')
-    };
-    setNotifications([...notifications, newNote]);
-    showSuccess('Mahsulot rad etildi va o\'chirildi.');
+  const handleRejectProduct = async (id) => {
+    try {
+      await api.put(`/products/${id}/reject`);
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      
+      setProducts(products.filter(p => p.id !== id));
+      
+      const newNote = {
+        id: Date.now(),
+        phone: product.creatorPhone,
+        message: `Afsuski, "${product.name}" mahsulotingiz talablarga javob bermagani uchun rad etildi.`,
+        type: 'rejected',
+        date: new Date().toLocaleDateString('uz-UZ')
+      };
+      setNotifications([...notifications, newNote]);
+      showSuccess('Mahsulot rad etildi va o\'chirildi.');
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
   // Delete category

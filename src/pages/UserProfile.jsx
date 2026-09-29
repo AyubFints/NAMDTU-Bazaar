@@ -41,43 +41,103 @@ const UserProfile = () => {
   const [unseenApproved, setUnseenApproved] = useState(false);
   const [myProducts, setMyProducts] = useState([]);
   const [productModalOpen, setProductModalOpen] = useState(false);
+  const [mySales, setMySales] = useState([]);
+  const [showApprovalMsg, setShowApprovalMsg] = useState(false);
   const [productFormData, setProductFormData] = useState({
     name: '', price: '', oldPrice: '', category: '', description: '', images: [],
-    cardNumber: '', cardHolderName: '', cardType: 'uzcard'
+    cardNumber: '', cardHolderName: '', cardType: 'uzcard', sizes: []
   });
+  const [customSize, setCustomSize] = useState('');
+  const [customStock, setCustomStock] = useState('1');
+  const [showCustomSizeInput, setShowCustomSizeInput] = useState(false);
+
+  const addStandardSize = (sizeVal) => {
+    if (!productFormData.sizes.find(s => s.size === sizeVal)) {
+      setProductFormData(prev => ({ ...prev, sizes: [...prev.sizes, { size: sizeVal, stock: 1 }] }));
+    }
+  };
+
+  const handleAddCustomSize = () => {
+    if (customSize.trim()) {
+      if (!productFormData.sizes.find(s => s.size === customSize.trim())) {
+        setProductFormData(prev => ({ 
+          ...prev, 
+          sizes: [...prev.sizes, { size: customSize.trim(), stock: parseInt(customStock) || 1 }] 
+        }));
+      }
+      setCustomSize('');
+      setCustomStock('1');
+      setShowCustomSizeInput(false);
+    }
+  };
+
+  const updateSizeStock = (index, val) => {
+    const newSizes = [...productFormData.sizes];
+    newSizes[index].stock = parseInt(val) || 0;
+    setProductFormData(prev => ({ ...prev, sizes: newSizes }));
+  };
+
+  const removeSize = (index) => {
+    setProductFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.filter((_, i) => i !== index)
+    }));
+  };
 
   useEffect(() => {
     const approvedApps = myApplications.filter(a => a.status === 'approved').length;
     const approvedProds = myProducts.filter(p => p.status === 'approved').length;
     const totalApproved = approvedApps + approvedProds;
     const lastSeen = parseInt(localStorage.getItem('lastSeenApprovedCount') || '0', 10);
-    if (totalApproved > lastSeen && activeMenu !== "Do'kon ochish") {
+    
+    if (activeMenu === "Do'kon ochish" || activeMenu === "Menga kelgan buyurtmalar") {
+      localStorage.setItem('lastSeenApprovedCount', totalApproved.toString());
+      setUnseenApproved(false);
+      window.dispatchEvent(new Event('storeAppUpdated'));
+    } else if (totalApproved > lastSeen) {
       setUnseenApproved(true);
+    } else {
+      setUnseenApproved(false);
     }
   }, [myApplications, myProducts, activeMenu]);
 
   const handleStoreTabClick = () => {
     setActiveMenu("Do'kon ochish");
-    const approvedApps = myApplications.filter(a => a.status === 'approved').length;
     const approvedProds = myProducts.filter(p => p.status === 'approved').length;
-    localStorage.setItem('lastSeenApprovedCount', (approvedApps + approvedProds).toString());
-    setUnseenApproved(false);
+
+    const hasShown = localStorage.getItem('firstProductApprovedMsgShown');
+    if (!hasShown && approvedProds > 0) {
+      setShowApprovalMsg(true);
+      localStorage.setItem('firstProductApprovedMsgShown', 'true');
+      setTimeout(() => setShowApprovalMsg(false), 10000);
+    }
   };
   
   useEffect(() => {
     const fetchStoreData = async () => {
+      // Fetch categories
       try {
-        const [catsRes, appsRes, prodsRes] = await Promise.all([
-          api.get('/categories'),
-          api.get('/store-applications/my-applications'),
-          api.get('/products/my-products')
-        ]);
+        const catsRes = await api.get('/categories');
         setCategories(catsRes.data);
+      } catch (err) { console.error('Failed to load categories', err); }
+
+      // Fetch applications
+      try {
+        const appsRes = await api.get('/store-applications/my-applications');
         setMyApplications(appsRes.data);
+      } catch (err) { console.error('Failed to load applications', err); }
+
+      // Fetch products
+      try {
+        const prodsRes = await api.get('/products/my-products');
         setMyProducts(prodsRes.data);
-      } catch (error) {
-        console.error('Failed to load store application data:', error);
-      }
+      } catch (err) { console.error('Failed to load products', err); }
+
+      // Fetch sales (might fail if backend not updated)
+      try {
+        const salesRes = await api.get('/orders/my-sales');
+        setMySales(salesRes.data);
+      } catch (err) { console.error('Failed to load sales', err); }
     };
     if (user) {
       fetchStoreData();
@@ -156,11 +216,14 @@ const UserProfile = () => {
         cardNumber: productFormData.cardNumber,
         cardHolderName: productFormData.cardHolderName,
         cardType: productFormData.cardType,
-        stock: '1'
+        sizes: productFormData.sizes,
+        stock: productFormData.sizes.length > 0 
+          ? productFormData.sizes.reduce((acc, curr) => acc + curr.stock, 0).toString() 
+          : '1'
       });
       setMyProducts([...myProducts, data]);
       setProductModalOpen(false);
-      setProductFormData({ name: '', price: '', oldPrice: '', category: '', description: '', images: [], cardNumber: '', cardHolderName: '', cardType: 'uzcard' });
+      setProductFormData({ name: '', price: '', oldPrice: '', category: '', description: '', images: [], cardNumber: '', cardHolderName: '', cardType: 'uzcard', sizes: [] });
       alert("Tavar muvaffaqiyatli jo'natildi! Admin tasdiqlashi kutilmoqda.");
     } catch (error) {
       alert("Xatolik: " + (error.response?.data?.message || error.message));
@@ -266,6 +329,19 @@ const UserProfile = () => {
 
   return (
     <div className="user-profile-layout">
+      {/* Approval Notification Modal */}
+      {showApprovalMsg && (
+        <div className="approval-toast">
+          Sizning mahsulotingiz tasdiqlandi va siz uchun "Menga kelgan buyurtmalar" bo'limi ochildi. Siz bu yerdan turib mijozlar bilan bog'lanib tavaringizni sotishingiz mumkin.
+          <button 
+            onClick={() => setShowApprovalMsg(false)}
+            className="approval-toast-close"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Under Construction Modal */}
       {showUnderConstruction && (
         <div className="up-modal-overlay">
@@ -281,8 +357,8 @@ const UserProfile = () => {
 
       {/* Product Creation Modal (Creative & Compact) */}
       {productModalOpen && (
-        <div className="up-modal-overlay">
-          <div className="up-modal creative-modal">
+        <div className="up-modal-overlay" onClick={() => setProductModalOpen(false)}>
+          <div className="up-modal creative-modal" onClick={(e) => e.stopPropagation()}>
             <button className="up-modal-close" onClick={() => setProductModalOpen(false)}>
               <X size={20} />
             </button>
@@ -353,6 +429,61 @@ const UserProfile = () => {
                 <textarea className="creative-input" rows="3" placeholder="Mahsulot haqida ma'lumot..." value={productFormData.description} onChange={(e) => setProductFormData({...productFormData, description: e.target.value})} />
               </div>
 
+              {productFormData.category && (
+                <div className="creative-card-section" style={{ marginTop: '15px' }}>
+                  <label className="section-label" style={{ marginBottom: '8px' }}>O'lchamlar va variantlar (qaysidan nechta bor)</label>
+                  
+                  {productFormData.sizes.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
+                      {productFormData.sizes.map((s, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                          <span style={{ fontWeight: 'bold', color: '#1e293b', minWidth: '60px' }}>{s.size}</span>
+                          <input 
+                            type="number" 
+                            className="creative-input" 
+                            style={{ padding: '6px 10px', width: '80px', flex: 1 }} 
+                            value={s.stock} 
+                            onChange={(e) => updateSizeStock(idx, e.target.value)} 
+                            min="0"
+                          />
+                          <span style={{ fontSize: '13px', color: '#64748b' }}>dona</span>
+                          <button type="button" onClick={() => removeSize(idx)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                    {['S', 'M', 'L', 'XL', 'XXL'].map(sz => (
+                      <button key={sz} type="button" onClick={() => addStandardSize(sz)} style={{ padding: '6px 12px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: '500' }}>
+                        + {sz}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => setShowCustomSizeInput(!showCustomSizeInput)} style={{ padding: '6px 12px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: '500' }}>
+                      Boshqacha variant qo'shish
+                    </button>
+                  </div>
+
+                  {showCustomSizeInput && (
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', background: '#f1f5f9', padding: '12px', borderRadius: '8px', marginTop: '10px' }}>
+                      <div className="creative-input-group" style={{ flex: 2 }}>
+                        <label>Variant nomi (masalan: 39, Qizil)</label>
+                        <input type="text" className="creative-input" value={customSize} onChange={(e) => setCustomSize(e.target.value)} placeholder="Nomi" />
+                      </div>
+                      <div className="creative-input-group" style={{ flex: 1 }}>
+                        <label>Soni</label>
+                        <input type="number" className="creative-input" value={customStock} onChange={(e) => setCustomStock(e.target.value)} min="1" />
+                      </div>
+                      <button type="button" onClick={handleAddCustomSize} className="up-primary-btn" style={{ margin: '0', padding: '10px 16px', background: '#2563eb' }}>
+                        Qo'shish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="creative-card-section">
                 <label className="section-label">Plastik karta (foyda uchun)</label>
                 <div className="creative-form-row">
@@ -404,6 +535,11 @@ const UserProfile = () => {
               <span style={{ background: '#ef4444', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>1</span>
             )}
           </button>
+          {myProducts.filter(p => p.status === 'approved').length > 0 && (
+            <button className={`up-nav-item ${activeMenu === 'Menga kelgan buyurtmalar' ? 'active' : ''}`} onClick={() => setActiveMenu('Menga kelgan buyurtmalar')}>
+              Menga kelgan buyurtmalar
+            </button>
+          )}
         </nav>
       </aside>
 
@@ -567,6 +703,55 @@ const UserProfile = () => {
                 </div>
               )}
             </div>
+          </div>
+        ) : activeMenu === "Menga kelgan buyurtmalar" ? (
+          <div className="up-settings-wrapper">
+            <h2>Menga kelgan buyurtmalar</h2>
+            <p style={{ color: '#64748b', marginBottom: '20px' }}>Bu yerda sizning tavarlaringizni sotib olgan xaridorlarning ro'yxati ko'rinadi.</p>
+            {mySales && mySales.length > 0 ? (
+              <div className="my-sales-list">
+                {mySales.map(order => (
+                  <div key={order.id} style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '15px', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px', marginBottom: '10px' }}>
+                      <div>
+                        <strong>Buyurtma ID:</strong> #{order.id}<br/>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>{new Date(order.createdAt).toLocaleString('uz-UZ')}</span>
+                      </div>
+                      <div>
+                        <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                          {order.status || 'Yangi'}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <p><strong>Xaridor:</strong> {order.buyerName} ({order.buyerPhone})</p>
+                      <p><strong>Manzil:</strong> {order.address}</p>
+                      <p><strong>Tavarlar:</strong></p>
+                      <ul style={{ paddingLeft: '20px' }}>
+                        {order.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} - {item.quantity} dona ({item.price} so'm)
+                          </li>
+                        ))}
+                      </ul>
+                      <p style={{ marginTop: '10px', fontSize: '16px', fontWeight: 'bold', color: '#2563eb' }}>
+                        Sizga tushadigan jami: {order.totalAmount.toLocaleString('uz-UZ')} so'm
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="up-empty-state">
+                <div style={{marginBottom: '20px', color: '#cbd5e1'}}>
+                  <Store size={64} strokeWidth={1} />
+                </div>
+                <h2>Hozircha buyurtmalar yo'q</h2>
+                <p>
+                  Sizning tavarlaringiz bo'yicha hali hech qanday xarid amalga oshirilmagan.
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <>

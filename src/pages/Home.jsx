@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, ChevronDown, ChevronLeft, ChevronRight, Heart, ShoppingBag, Star, Minus, Plus } from 'lucide-react';
+import { ShieldCheck, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Heart, ShoppingBag, Star, Minus, Plus } from 'lucide-react';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCart } from '../context/CartContext';
 import api from '../api/axios';
@@ -59,6 +59,11 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [allProducts, setAllProducts] = useState([]);
   const [banners, setBanners] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [catMinPrice, setCatMinPrice] = useState(0);
+  const [catMaxPrice, setCatMaxPrice] = useState(10000000);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
   const sliderRef = useRef(null);
@@ -66,6 +71,27 @@ const Home = () => {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { cart, addToCart, updateQuantity, getCartItem, removeFromCart } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const categoryProducts = allProducts.filter(p => activeCategory === 'all' || p.category === activeCategory);
+    if (categoryProducts.length > 0) {
+      const prices = categoryProducts.map(p => {
+        const numStr = String(p.price).replace(/\D/g, '');
+        return parseInt(numStr, 10) || 0;
+      });
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      setMinPrice(min);
+      setMaxPrice(max);
+      setCatMinPrice(min);
+      setCatMaxPrice(max);
+    } else {
+      setMinPrice('');
+      setMaxPrice('');
+      setCatMinPrice(0);
+      setCatMaxPrice(10000000);
+    }
+  }, [activeCategory, allProducts]);
 
   // Load admin products and banners from backend
   useEffect(() => {
@@ -97,12 +123,29 @@ const Home = () => {
       } catch (error) {
         console.error("Failed to load banners", error);
       }
+
+      try {
+        const { data: catsData } = await api.get('/categories');
+        setCategories(catsData || []);
+      } catch (error) {
+        console.error("Failed to load categories", error);
+      }
     };
     fetchHomeData();
+    
+    // Listen for custom event if categories are updated from Admin Panel
+    const handleCategoriesUpdate = async () => {
+      try {
+        const { data: catsData } = await api.get('/categories');
+        setCategories(catsData || []);
+      } catch (error) {}
+    };
+    window.addEventListener('categoriesUpdated', handleCategoriesUpdate);
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('categoriesUpdated', handleCategoriesUpdate);
     };
   }, []);
 
@@ -153,16 +196,12 @@ const Home = () => {
 
   return (
     <div className="home-page">
-
-      
-
-      {activeCategory === 'all' && (
+      <div className={`hero-slider-wrapper ${activeCategory === 'all' ? 'expanded' : 'collapsed'}`}>
         <section className="hero-slider-section">
           <div className="slider-container">
             <button className="slider-arrow left" onClick={prevSlide}>
               <ChevronLeft size={28} />
             </button>
-            
             <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
               {banners.map(slide => (
                 <div className="slide" key={slide.id}>
@@ -170,11 +209,9 @@ const Home = () => {
                 </div>
               ))}
             </div>
-
             <button className="slider-arrow right" onClick={nextSlide}>
               <ChevronRight size={28} />
             </button>
-
             <div className="slider-dots">
               {banners.map((_, idx) => (
                 <span 
@@ -191,7 +228,100 @@ const Home = () => {
             </div>
           </div>
         </section>
-      )}{activeCategory !== 'all' && SUBCATEGORIES_MAP[activeCategory] && (
+      </div>
+
+      <div className="container home-layout">
+        {/* Left Sidebar for Categories (Desktop) */}
+        <aside className="home-sidebar">
+          <div className="sidebar-categories-card">
+            <div className="sidebar-header">
+              Kategoriyalar
+            </div>
+            <ul className="sidebar-list">
+               <li 
+                 className={activeCategory === 'all' ? 'active' : ''}
+                 onClick={() => { setActiveCategory('all'); navigate('/?category=all'); }}
+               >
+                 Barchasi
+               </li>
+               {categories.map((cat, idx) => {
+                 const catName = cat.name || cat;
+                 return (
+                   <li 
+                     key={idx}
+                     className={activeCategory === catName ? 'active' : ''}
+                     onClick={() => {
+                        setActiveCategory(catName);
+                        navigate(`/?category=${encodeURIComponent(catName)}`);
+                     }}
+                   >
+                     {catName}
+                   </li>
+                 );
+               })}
+            </ul>
+          </div>
+          
+          <div className="sidebar-filter-card">
+             <div className="filter-header">
+               <span>Narxi (so'm)</span>
+               <ChevronUp size={18} />
+             </div>
+             <div className="filter-inputs-labels">
+               <span>dan</span>
+               <span>gacha</span>
+             </div>
+             <div className="filter-inputs-row">
+               <input 
+                 type="number" 
+                 value={minPrice} 
+                 onChange={e => setMinPrice(e.target.value)} 
+                 placeholder="0"
+               />
+               <div className="filter-divider"></div>
+               <input 
+                 type="number" 
+                 value={maxPrice} 
+                 onChange={e => setMaxPrice(e.target.value)} 
+                 placeholder="0"
+               />
+             </div>
+             <div className="filter-slider-container">
+               <div className="slider-track-bg"></div>
+               <div 
+                 className="slider-track-fill" 
+                 style={{
+                   left: `${catMaxPrice > catMinPrice ? ((Number(minPrice) - catMinPrice) / (catMaxPrice - catMinPrice)) * 100 : 0}%`,
+                   right: `${catMaxPrice > catMinPrice ? (100 - ((Number(maxPrice) - catMinPrice) / (catMaxPrice - catMinPrice)) * 100) : 0}%`
+                 }}
+               ></div>
+               <input 
+                 type="range" 
+                 min={catMinPrice} 
+                 max={catMaxPrice} 
+                 value={minPrice === '' ? catMinPrice : minPrice} 
+                 onChange={(e) => {
+                   const val = Math.min(Number(e.target.value), Number(maxPrice) - 1);
+                   setMinPrice(val);
+                 }}
+               />
+               <input 
+                 type="range" 
+                 min={catMinPrice} 
+                 max={catMaxPrice} 
+                 value={maxPrice === '' ? catMaxPrice : maxPrice} 
+                 onChange={(e) => {
+                   const val = Math.max(Number(e.target.value), Number(minPrice) + 1);
+                   setMaxPrice(val);
+                 }}
+               />
+             </div>
+          </div>
+        </aside>
+
+        {/* Right Main Content */}
+        <div className="home-main-content">
+      {activeCategory !== 'all' && SUBCATEGORIES_MAP[activeCategory] && (
         <div className="visual-categories-bar">
           {SUBCATEGORIES_MAP[activeCategory].map(sub => (
             <div 
@@ -220,7 +350,7 @@ const Home = () => {
           </div>
         )}
 
-        <div className="products-grid">
+        <div className="products-grid" key={activeCategory}>
           {loading ? (
             // Skeleton loading cards
             Array.from({ length: 8 }).map((_, i) => (
@@ -234,7 +364,15 @@ const Home = () => {
                 </div>
               </div>
             ))
-          ) : allProducts.filter(p => activeCategory === 'all' || p.category === activeCategory).map(product => {
+          ) : allProducts.filter(p => {
+            if (activeCategory !== 'all' && p.category !== activeCategory) return false;
+            
+            const numericPrice = parseFloat(String(p.price).replace(/\D/g, '')) || 0;
+            if (minPrice !== '' && numericPrice < parseFloat(minPrice)) return false;
+            if (maxPrice !== '' && numericPrice > parseFloat(maxPrice)) return false;
+            
+            return true;
+          }).map(product => {
             // Determine the image to show (handle new multiple images array or old single image)
             const productImg = (product.images && product.images.length > 0) 
               ? product.images[0] 
@@ -339,6 +477,8 @@ const Home = () => {
           </div>
         )}
       </section>
+      </div>
+      </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@ const {
   createOrder,
   getOrders,
   getMyOrders,
+  getMySales,
   cancelOrder,
   updateOrderStatus,
   deleteOrder
@@ -16,6 +17,9 @@ router.route('/')
 
 router.route('/my')
   .post(getMyOrders);
+
+router.route('/my-sales')
+  .get(protect, getMySales);
 
 router.route('/:id/cancel')
   .post(cancelOrder);

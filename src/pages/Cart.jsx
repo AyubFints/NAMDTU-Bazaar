@@ -123,7 +123,7 @@ const Cart = () => {
       const response = await api.post('/orders', {
         buyer: user ? { name: user.name, phone: phone } : { name: 'Mehmon', phone: phone },
         items: selectedItems.map(item => ({
-          originalId: item.id,
+          originalId: item.originalId || item.id,
           name: item.name,
           quantity: item.quantity,
           price: item.price,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import api from '../api/axios';
@@ -8,6 +8,31 @@ import './AddProduct.css';
 const AddProduct = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showApprovalMsg, setShowApprovalMsg] = useState(false);
+
+  useEffect(() => {
+    const checkApprovedProducts = async () => {
+      if (user && user.role !== 'admin') {
+        const hasShown = localStorage.getItem('firstProductApprovedMsgShown');
+        if (!hasShown) {
+          try {
+            const { data } = await api.get('/products/my-products');
+            const hasApproved = data.some(p => p.status === 'approved');
+            if (hasApproved) {
+              setShowApprovalMsg(true);
+              localStorage.setItem('firstProductApprovedMsgShown', 'true');
+              setTimeout(() => {
+                setShowApprovalMsg(false);
+              }, 10000);
+            }
+          } catch (error) {
+            console.error("Xatolik", error);
+          }
+        }
+      }
+    };
+    checkApprovedProducts();
+  }, [user]);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -67,6 +92,25 @@ const AddProduct = () => {
 
   return (
     <div className="add-product-container">
+      {showApprovalMsg && (
+        <div style={{
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#4ade80', color: '#166534', padding: '15px 40px 15px 20px',
+          borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 1000,
+          maxWidth: '90%', textAlign: 'center', fontSize: '14px', fontWeight: '500'
+        }}>
+          Sizning mahsulotingiz tasdiqlandi va siz uchun buyurtmalarim bo'limi ochildi va siz bu yerdan turib sizga kelgan buyurtmalarni ko'rib mijozlar bilan bog'lanib tavaringizni sotishingiz mumkin.
+          <button 
+            onClick={() => setShowApprovalMsg(false)}
+            style={{
+              position: 'absolute', top: '10px', right: '10px', background: 'transparent',
+              border: 'none', fontSize: '18px', cursor: 'pointer', color: '#166534'
+            }}
+          >
+            &times;
+          </button>
+        </div>
+      )}
       <div className="card add-product-card">
         <div className="card-header">
           <h2>Yangi Mahsulot Qo'shish</h2>

@@ -139,11 +139,241 @@
   }
 }
 
-.hero-slider-section {
-  margin-top: 12px;
-  margin-bottom: 24px;
+/* Home Layout with Sidebar */
+.home-layout {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: flex-start;
+}
+
+.home-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  display: block;
+  margin-left: -32px; /* Sticks to the absolute left edge of the screen */
+}
+
+.sidebar-categories-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sidebar-header {
+  background: transparent;
+  color: #1e293b;
+  padding: 16px 16px;
+  font-weight: 700;
+  font-size: 18px;
+  border-bottom: none;
+}
+
+.sidebar-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.sidebar-list li {
+  padding: 12px 16px;
+  border-bottom: none;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 4px;
+  color: #475569;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-list li:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+}
+
+.sidebar-list li.active {
+  background: #e2e8f0; /* Gray background */
+  color: #1e293b; /* Dark text */
+  font-weight: 600;
+  box-shadow: none;
+  border-left: none;
+}
+
+.sidebar-filter-card {
+  margin-top: 32px;
   width: 100%;
+  background: #ffffff;
+  padding: 20px 20px 20px 16px;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border: 1px solid #f1f5f9;
+  border-left: none;
+  transition: all 0.3s ease;
+}
+
+.sidebar-filter-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.filter-header span {
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 17px;
+}
+
+.filter-header svg {
+  color: #9333ea;
+}
+
+.filter-inputs-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.filter-inputs-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   overflow: hidden;
+  background: #f8fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-inputs-row:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+  background: #ffffff;
+}
+
+.filter-inputs-row input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  background: transparent;
+  outline: none;
+  text-align: center;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+}
+
+.filter-slider-container {
+  position: relative;
+  height: 24px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.slider-track-bg {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.slider-track-fill {
+  position: absolute;
+  top: 10px;
+  height: 4px;
+  background: #fbbf24;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.filter-slider-container input[type="range"] {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 100%;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.filter-slider-container input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #fbbf24;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: -6px;
+}
+
+.filter-slider-container input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+
+.home-main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 992px) {
+  .home-sidebar {
+    display: none;
+  }
+  .home-layout {
+    display: block;
+  }
+}
+
+.hero-slider-wrapper {
+  overflow: hidden;
+  width: 100%;
+  padding: 0 12px; /* Reduced side padding so there isn't too much space */
+  box-sizing: border-box;
+}
+
+.hero-slider-wrapper.collapsed {
+  display: none;
+}
+
+.hero-slider-wrapper.expanded {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.hero-slider-section {
+  width: 100%;
 }
 
 .slider-container {
@@ -153,13 +383,14 @@
 
 .slider-track {
   display: flex;
-  height: 350px;
+  height: 300px; /* Slightly taller for desktop */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
   gap: 16px;
   padding: 0;
+  border-radius: 12px; /* Rounds the clipping edge for peeking slides */
 }
 
 .slider-track::-webkit-scrollbar {
@@ -167,11 +398,11 @@
 }
 
 .slide {
-  flex: 0 0 1200px;
-  max-width: 1200px;
+  flex: 0 0 85%; /* Re-adjusted based on user request */
+  max-width: 85%;
   height: 100%;
   scroll-snap-align: start;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
 }
@@ -376,7 +607,7 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
 
@@ -639,48 +870,7 @@
   color: #0f172a;
 }
 
-/* ===== SKELETON LOADER ===== */
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-
-.skeleton-card {
-  pointer-events: none;
-}
-
-.skeleton-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-  margin-bottom: 12px;
-}
-
-.skeleton-price {
-  height: 20px;
-  width: 55%;
-  margin-bottom: 8px;
-}
-
-.skeleton-title {
-  height: 16px;
-  width: 90%;
-  margin-bottom: 6px;
-}
-
-.skeleton-btn {
-  height: 40px;
-  width: 100%;
-  margin-top: 10px;
-  border-radius: 10px;
-}
+/* Skeleton classes are now in index.css */
 
 @media (max-width: 1200px) {
   .products-grid {
