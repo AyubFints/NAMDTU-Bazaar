@@ -1,54 +1,62 @@
-const Banner = require('../models/Banner');
+const { Banner } = require('../models');
+const { validateBanner } = require('../validation/bannerValidation');
 
 exports.getBanners = async (req, res) => {
   try {
     const banners = await Banner.findAll({});
-    res.json(banners);
+    res.status(200).send(banners);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send(error.message);
+  }
+};
+
+exports.getBannerById = async (req, res) => {
+  try {
+    const banner = await Banner.findByPk(req.params.id);
+    if (!banner) return res.status(404).send('Banner not found');
+    res.status(200).send(banner);
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 };
 
 exports.createBanner = async (req, res) => {
+  const { error } = validateBanner(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
   try {
     const { image, title, subtitle } = req.body;
     const banner = await Banner.create({ image, title, subtitle });
-    res.status(201).json(banner);
+    res.status(201).send(banner);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 exports.updateBanner = async (req, res) => {
-  try {
-    const { image, title, subtitle } = req.body;
-    const banner = await Banner.findByPk(req.params.id);
+  const { error } = validateBanner(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-    if (banner) {
-      banner.image = image || banner.image;
-      banner.title = title || banner.title;
-      banner.subtitle = subtitle || banner.subtitle;
-      
-      await banner.save();
-      res.json(banner);
-    } else {
-      res.status(404).json({ message: 'Banner not found' });
-    }
+  try {
+    const banner = await Banner.findByPk(req.params.id);
+    if (!banner) return res.status(404).send('Banner not found');
+
+    await banner.update(req.body);
+    res.status(200).send(banner);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 exports.deleteBanner = async (req, res) => {
   try {
     const banner = await Banner.findByPk(req.params.id);
-    if (banner) {
-      await banner.destroy();
-      res.json({ message: 'Banner removed' });
-    } else {
-      res.status(404).json({ message: 'Banner not found' });
-    }
+    if (!banner) return res.status(404).send('Banner not found');
+
+    const data = banner.toJSON();
+    await banner.destroy();
+    res.status(200).send(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send(error.message);
   }
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, ChevronLeft, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import './Orders.css';
 
@@ -8,18 +9,20 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const savedIds = JSON.parse(localStorage.getItem('my_order_ids') || '[]');
-      if (savedIds.length === 0) {
+      const phone = user?.phone || user?.username;
+      if (savedIds.length === 0 && !phone) {
         setOrders([]);
         setLoading(false);
         return;
       }
-      const response = await api.post('/orders/my', { orderIds: savedIds });
+      const response = await api.post('/orders/my', { orderIds: savedIds, phone });
       setOrders(response.data);
     } catch (error) {
       console.error("Failed to fetch my orders", error);
@@ -30,7 +33,14 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    const handleStatusChanged = () => {
+      fetchOrders();
+    };
+    window.addEventListener('orderStatusChanged', handleStatusChanged);
+    return () => {
+      window.removeEventListener('orderStatusChanged', handleStatusChanged);
+    };
+  }, [user]);
 
   const formatMoney = (val) => Number(val).toLocaleString('uz-UZ') + " so'm";
 
@@ -56,6 +66,16 @@ const Orders = () => {
         <h1>Mening buyurtmalarim</h1>
       </div>
 
+      {orders.some(o => o.status === 'Sotildi') && (
+        <div className="orders-sold-alert-banner">
+          <div className="orders-sold-alert-icon">🎉</div>
+          <div className="orders-sold-alert-content">
+            <h4>Xushxabar! Buyurtmangiz admin tomonidan tasdiqlandi!</h4>
+            <p>Siz xarid qilgan mahsulot(lar) muvaffaqiyatli <strong className="sold-highlight">"Sotildi"</strong> deb belgilandi. Xaridingiz uchun tashakkur!</p>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="orders-loading">Yuklanmoqda...</div>
       ) : orders.length === 0 ? (
@@ -74,7 +94,7 @@ const Orders = () => {
               
             const statusText = 
               order.status === 'Yangi' ? 'Tayyorlanmoqda' : 
-              order.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Tasdiqlangan va sotib olingan';
+              order.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Sotildi';
 
             // Show main image of first item
             const firstItemImg = order.items && order.items[0] 
@@ -94,6 +114,13 @@ const Orders = () => {
                     </div>
                     <div className="order-card-date">{new Date(order.createdAt).toLocaleString('uz-UZ')}</div>
                     <div className="order-card-price">{formatMoney(order.totalAmount)}</div>
+
+                    {order.status === 'Sotildi' && (
+                      <div className="order-sold-card-notice">
+                        <span className="sold-check-icon">✓</span>
+                        <span>Ushbu buyurtma admin tomonidan "Sotildi" deb tasdiqlangan</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -140,7 +167,7 @@ const Orders = () => {
                     selectedOrder.status === 'Bekor qilingan' ? 'text-red' : 'text-green'
                   }>
                     {selectedOrder.status === 'Yangi' ? 'Tayyorlanmoqda' : 
-                     selectedOrder.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Yetkazildi'}
+                     selectedOrder.status === 'Bekor qilingan' ? 'Bekor qilingan' : 'Sotildi'}
                   </strong>
                 </div>
                 <div className="orders-modal-row">
@@ -152,6 +179,17 @@ const Orders = () => {
                   <strong>{formatMoney(selectedOrder.totalAmount)}</strong>
                 </div>
               </div>
+
+              {selectedOrder.status === 'Sotildi' && (
+                <div className="orders-modal-sold-box">
+                  <div className="orders-modal-sold-title">
+                    <span>🎉</span> Buyurtmangiz rasman "Sotildi" holatiga o'tkazildi!
+                  </div>
+                  <div className="orders-modal-sold-desc">
+                    Admin buyurtmangizni ko'rib chiqib tasdiqladi. Mahsulotingiz xaridi muvaffaqiyatli yakunlandi.
+                  </div>
+                </div>
+              )}
             </div>
 
             {selectedOrder.status === 'Yangi' && (
@@ -169,3 +207,4 @@ const Orders = () => {
 };
 
 export default Orders;
+

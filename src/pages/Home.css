@@ -359,8 +359,9 @@
 .hero-slider-wrapper {
   overflow: hidden;
   width: 100%;
-  padding: 0 12px; /* Reduced side padding so there isn't too much space */
+  padding: 0 32px;
   box-sizing: border-box;
+  margin-top: 10px;
 }
 
 .hero-slider-wrapper.collapsed {
@@ -379,18 +380,22 @@
 .slider-container {
   position: relative;
   width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .slider-track {
   display: flex;
-  height: 300px; /* Slightly taller for desktop */
+  width: 100%;
+  height: 250px; /* Panoramic sleek height - not too tall */
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  gap: 16px;
+  gap: 0; /* Exactly 1 image visible, no gap */
   padding: 0;
-  border-radius: 12px; /* Rounds the clipping edge for peeking slides */
+  border-radius: 16px;
 }
 
 .slider-track::-webkit-scrollbar {
@@ -398,11 +403,14 @@
 }
 
 .slide {
-  flex: 0 0 85%; /* Re-adjusted based on user request */
-  max-width: 85%;
+  flex: 0 0 100%; /* Exactly 100% width - only 1 image at a time */
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
   height: 100%;
   scroll-snap-align: start;
-  border-radius: 12px;
+  scroll-snap-stop: always;
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
 }
@@ -412,16 +420,22 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  display: block;
 }
 
-/* Mobile: peeking slider */
-@media (max-width: 768px) {
+/* Tablet */
+@media (max-width: 1024px) {
+  .hero-slider-wrapper {
+    padding: 0 20px;
+  }
   .slider-track {
     height: 200px;
-    gap: 8px;
+    gap: 0;
   }
   .slide {
-    flex: 0 0 85%;
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -534,13 +548,22 @@
 }
 
 @media (max-width: 768px) {
+  .hero-slider-wrapper {
+    padding: 0 12px;
+    margin-top: 6px;
+    margin-bottom: 16px;
+  }
+
   .slider-track {
-    height: 140px;
-    gap: 8px;
+    height: 150px;
+    gap: 0;
+    border-radius: 12px;
   }
   
   .slide {
-    flex: 0 0 88%;
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
     border-radius: 12px;
   }
   

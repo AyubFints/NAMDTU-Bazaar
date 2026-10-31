@@ -36,7 +36,32 @@ const AdminPanel = () => {
   // Products list
   const [products, setProducts] = useState([]);
 
-  // Fetch products and categories from backend
+  // Banners list
+  const [banners, setBanners] = useState([]);
+  const [newBannerImage, setNewBannerImage] = useState('');
+  const [newBannerTitle, setNewBannerTitle] = useState('');
+  const [newBannerSubtitle, setNewBannerSubtitle] = useState('');
+  const [editingBannerId, setEditingBannerId] = useState(null);
+  const [bannerToDelete, setBannerToDelete] = useState(null);
+
+  // Orders list
+  const [orders, setOrders] = useState([]);
+  const newOrdersCount = orders.filter(o => o.status === 'Yangi').length;
+
+  // Store Applications list
+  const [storeApps, setStoreApps] = useState([]);
+  const newStoreAppsCount = storeApps.filter(app => app.status === 'pending').length;
+
+  // Notifications
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('notifications');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Success message
+  const [successMsg, setSuccessMsg] = useState('');
+
+  // Fetch products, categories, and banners from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -55,31 +80,18 @@ const AdminPanel = () => {
     fetchData();
   }, []);
 
-  // Notifications
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('notifications');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Orders list
-  const [orders, setOrders] = useState([]);
-  const newOrdersCount = orders.filter(o => o.status === 'Yangi').length;
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const { data } = await api.get('/orders');
-        setOrders(data);
+        // Faqat yangi kelib tushgan buyurtmalarni ko'rsatish (sotilganlar admin ro'yxatidan o'chadi)
+        setOrders(data.filter(o => o.status === 'Yangi'));
       } catch (error) {
         console.error("Failed to load orders in admin", error);
       }
     };
     fetchOrders();
   }, []);
-
-  // Store Applications list
-  const [storeApps, setStoreApps] = useState([]);
-  const newStoreAppsCount = storeApps.filter(app => app.status === 'pending').length;
 
   useEffect(() => {
     const fetchStoreApps = async () => {
@@ -92,17 +104,6 @@ const AdminPanel = () => {
     };
     fetchStoreApps();
   }, []);
-
-  // Banners list
-  const [banners, setBanners] = useState([]);
-  const [newBannerImage, setNewBannerImage] = useState('');
-  const [newBannerTitle, setNewBannerTitle] = useState('');
-  const [newBannerSubtitle, setNewBannerSubtitle] = useState('');
-  const [editingBannerId, setEditingBannerId] = useState(null);
-  const [bannerToDelete, setBannerToDelete] = useState(null);
-
-  // Success message
-  const [successMsg, setSuccessMsg] = useState('');
 
 
 
@@ -330,45 +331,30 @@ const AdminPanel = () => {
     setTimeout(() => setSuccessMsg(''), 3000);
   };
 
-  const handleMarkAsSold = (orderId) => {
-    // Find order
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
+  const handleMarkAsSold = async (orderId) => {
+    try {
+      // 1. Backend API orqali buyurtmani 'Sotildi' deb yangilash
+      await api.put(`/orders/${orderId}/status`, { status: 'Sotildi' });
 
-    // Deduct stock for each item in the order
-    let updatedProducts = [...products];
-
-    order.items.forEach(orderItem => {
-      // Assuming orderItem has: originalId (for product), size (if any), quantity
-      updatedProducts = updatedProducts.map(prod => {
-        if (prod.id === orderItem.originalId) {
-          let p = { ...prod };
-          if (p.sizes && p.sizes.length > 0 && orderItem.size) {
-            p.sizes = p.sizes.map(sz => {
-              if (sz.size === orderItem.size) {
-                return { ...sz, stock: Math.max(0, parseInt(sz.stock, 10) - orderItem.quantity) };
-              }
-              return sz;
-            });
-          } else if (p.stock) {
-            p.stock = Math.max(0, parseInt(p.stock, 10) - orderItem.quantity);
-          }
-          return p;
-        }
-        return prod;
-      });
-    });
-
-    setProducts(updatedProducts);
-
-    // Update order status to sold
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'Sotildi' } : o));
-    showSuccess("Sotildi! Mahsulotlar ombordan ayirildi.");
+      // 2. Admin ro'yxatidan darhol o'chirish ("admin bolimidan ochsin")
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      showSuccess("Sotildi! Buyurtma tasdiqlandi va admin ro'yxatidan chiqarildi.");
+      window.dispatchEvent(new Event('orderStatusChanged'));
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
-  const handleDeleteOrder = (orderId) => {
-    setOrders(orders.filter(o => o.id !== orderId));
-    showSuccess("Buyurtma o'chirildi!");
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm("Buyurtmani rostdan ham o'chirmoqchimisiz?")) return;
+    try {
+      await api.delete(`/orders/${orderId}`);
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      showSuccess("Buyurtma o'chirildi!");
+      window.dispatchEvent(new Event('orderStatusChanged'));
+    } catch (error) {
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const handleBannerImageUpload = (e) => {
@@ -398,6 +384,7 @@ const AdminPanel = () => {
         });
         setBanners(banners.map(b => b.id === editingBannerId ? data : b));
         showSuccess("Banner yangilandi!");
+        window.dispatchEvent(new Event('bannersUpdated'));
         setEditingBannerId(null);
       } else {
         const { data } = await api.post('/banners', {
@@ -407,6 +394,7 @@ const AdminPanel = () => {
         });
         setBanners([...banners, data]);
         showSuccess("Yangi banner qo'shildi!");
+        window.dispatchEvent(new Event('bannersUpdated'));
       }
 
       setNewBannerImage('');
@@ -439,6 +427,7 @@ const AdminPanel = () => {
         setBanners(banners.filter(b => b.id !== bannerToDelete));
         setBannerToDelete(null);
         showSuccess("Banner o'chirildi!");
+        window.dispatchEvent(new Event('bannersUpdated'));
       } catch (error) {
         alert("Xatolik: " + (error.response?.data?.message || error.message));
       }
@@ -983,7 +972,7 @@ const AdminPanel = () => {
                     <div className="admin-order-header">
                       <div>
                         <h3>Buyurtma #{order.id}</h3>
-                        <span className="admin-order-date">{new Date(order.date).toLocaleString('uz-UZ')}</span>
+                        <span className="admin-order-date">{new Date(order.createdAt || order.date || Date.now()).toLocaleString('uz-UZ')}</span>
                       </div>
                       <div className={`admin-order-status ${order.status === 'Yangi' ? 'status-new' : 'status-sold'}`}>
                         {order.status}
@@ -991,12 +980,14 @@ const AdminPanel = () => {
                     </div>
 
                     <div className="admin-order-customer">
-                      <strong>Telefon:</strong> <span>{order.phone}</span>
+                      <div><strong>Xaridor:</strong> <span>{order.buyerName || order.customer || "Xaridor"}</span></div>
+                      <div style={{ marginTop: '4px' }}><strong>Telefon:</strong> <span>{order.buyerPhone || order.phone || "-"}</span></div>
+                      {order.address && <div style={{ marginTop: '4px' }}><strong>Manzil:</strong> <span>{order.address}</span></div>}
                     </div>
 
                     <div className="admin-order-items">
                       <h4>Mahsulotlar:</h4>
-                      {order.items.map((item, idx) => (
+                      {order.items && order.items.map((item, idx) => (
                         <div key={idx} className="admin-order-item">
                           <img src={item.images?.[0] || item.image || "https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=500&auto=format&fit=crop&q=60"} alt={item.name} />
                           <div className="admin-order-item-info">
@@ -1011,14 +1002,14 @@ const AdminPanel = () => {
 
                     <div className="admin-order-footer">
                       <div className="admin-order-total">
-                        <strong>Jami:</strong> {formatPrice(order.total)}
+                        <strong>Jami:</strong> {formatPrice(order.totalAmount || order.total || 0)}
                       </div>
                       <div className="admin-order-actions">
-                        <button className="admin-delete-btn" onClick={() => handleDeleteOrder(order.id)}>
+                        <button className="admin-delete-btn" onClick={() => handleDeleteOrder(order.id)} title="O'chirish">
                           <Trash2 size={18} />
                         </button>
                         {order.status === 'Yangi' && (
-                          <button className="admin-save-btn" onClick={() => handleMarkAsSold(order.id)} style={{ width: 'auto', padding: '10px 20px' }}>
+                          <button className="admin-save-btn" onClick={() => handleMarkAsSold(order.id)} style={{ width: 'auto', padding: '10px 20px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
                             Sotildi deb belgilash
                           </button>
                         )}

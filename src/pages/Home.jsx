@@ -133,19 +133,27 @@ const Home = () => {
     };
     fetchHomeData();
     
-    // Listen for custom event if categories are updated from Admin Panel
+    // Listen for custom event if categories or banners are updated from Admin Panel
     const handleCategoriesUpdate = async () => {
       try {
         const { data: catsData } = await api.get('/categories');
         setCategories(catsData || []);
       } catch (error) {}
     };
+    const handleBannersUpdate = async () => {
+      try {
+        const { data: bannersData } = await api.get('/banners');
+        setBanners(bannersData || []);
+      } catch (error) {}
+    };
     window.addEventListener('categoriesUpdated', handleCategoriesUpdate);
+    window.addEventListener('bannersUpdated', handleBannersUpdate);
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('categoriesUpdated', handleCategoriesUpdate);
+      window.removeEventListener('bannersUpdated', handleBannersUpdate);
     };
   }, []);
 
@@ -158,11 +166,19 @@ const Home = () => {
     return slide.offsetWidth + gap;
   };
 
+  // Admin qo'shgan bannerlar va agar 1 ta bo'lsa zaxiradagi standartlar bilan boyitish
+  const displayBanners = (banners && banners.length >= 2)
+    ? banners
+    : (banners && banners.length === 1)
+      ? [...banners, ...HERO_SLIDES]
+      : HERO_SLIDES;
+
   // Auto-advance slider
   useEffect(() => {
+    if (displayBanners.length <= 1) return;
     const timer = setInterval(() => {
       if (sliderRef.current) {
-        const slideWidth = getSlideWidth();
+        const slideWidth = sliderRef.current.offsetWidth || 1;
         if (sliderRef.current.scrollLeft + sliderRef.current.offsetWidth >= sliderRef.current.scrollWidth - 10) {
           sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -171,26 +187,34 @@ const Home = () => {
       }
     }, 5000);
     return () => clearInterval(timer);
-  }, [banners.length]);
+  }, [displayBanners.length]);
 
   const handleSliderScroll = () => {
     if (!sliderRef.current) return;
-    const slideWidth = getSlideWidth();
+    const slideWidth = sliderRef.current.offsetWidth || 1;
     const index = Math.round(sliderRef.current.scrollLeft / slideWidth);
     setCurrentSlide(index);
   };
 
   const nextSlide = () => {
     if (sliderRef.current) {
-      const slideWidth = getSlideWidth();
-      sliderRef.current.scrollBy({ left: slideWidth, behavior: 'smooth' });
+      const slideWidth = sliderRef.current.offsetWidth;
+      if (sliderRef.current.scrollLeft + slideWidth >= sliderRef.current.scrollWidth - 10) {
+        sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        sliderRef.current.scrollBy({ left: slideWidth, behavior: 'smooth' });
+      }
     }
   };
 
   const prevSlide = () => {
     if (sliderRef.current) {
-      const slideWidth = getSlideWidth();
-      sliderRef.current.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+      const slideWidth = sliderRef.current.offsetWidth;
+      if (sliderRef.current.scrollLeft <= 10) {
+        sliderRef.current.scrollTo({ left: sliderRef.current.scrollWidth, behavior: 'smooth' });
+      } else {
+        sliderRef.current.scrollBy({ left: -slideWidth, behavior: 'smooth' });
+      }
     }
   };
 
@@ -199,33 +223,39 @@ const Home = () => {
       <div className={`hero-slider-wrapper ${activeCategory === 'all' ? 'expanded' : 'collapsed'}`}>
         <section className="hero-slider-section">
           <div className="slider-container">
-            <button className="slider-arrow left" onClick={prevSlide}>
-              <ChevronLeft size={28} />
-            </button>
+            {displayBanners.length > 1 && (
+              <button className="slider-arrow left" onClick={prevSlide} aria-label="Oldingi banner">
+                <ChevronLeft size={24} />
+              </button>
+            )}
             <div className="slider-track" ref={sliderRef} onScroll={handleSliderScroll}>
-              {banners.map(slide => (
+              {displayBanners.map(slide => (
                 <div className="slide" key={slide.id}>
                   <img src={slide.image} alt={slide.title || "Banner"} />
                 </div>
               ))}
             </div>
-            <button className="slider-arrow right" onClick={nextSlide}>
-              <ChevronRight size={28} />
-            </button>
-            <div className="slider-dots">
-              {banners.map((_, idx) => (
-                <span 
-                  key={idx} 
-                  className={`dot ${idx === currentSlide ? 'active' : ''}`} 
-                  onClick={() => {
-                    if (sliderRef.current) {
-                      const slideWidth = getSlideWidth();
-                      sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
-                    }
-                  }}
-                ></span>
-              ))}
-            </div>
+            {displayBanners.length > 1 && (
+              <button className="slider-arrow right" onClick={nextSlide} aria-label="Keyingi banner">
+                <ChevronRight size={24} />
+              </button>
+            )}
+            {displayBanners.length > 1 && (
+              <div className="slider-dots">
+                {displayBanners.map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`dot ${idx === currentSlide ? 'active' : ''}`} 
+                    onClick={() => {
+                      if (sliderRef.current) {
+                        const slideWidth = sliderRef.current.offsetWidth;
+                        sliderRef.current.scrollTo({ left: slideWidth * idx, behavior: 'smooth' });
+                      }
+                    }}
+                  ></span>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

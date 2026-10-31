@@ -14,23 +14,26 @@ const protect = async (req, res, next) => {
       req.user = await User.findByPk(decoded.id, {
         attributes: { exclude: ['password'] }
       });
-      next();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Foydalanuvchi topilmadi' });
+      }
+      return next();
     } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      console.error('JWT error:', error.message);
+      return res.status(401).json({ message: 'Avtorizatsiyadan o\'tilmagan, token yaroqsiz' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Avtorizatsiyadan o\'tilmagan, token yo\'q' });
   }
 };
 
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
-    next();
+    return next();
   } else {
-    res.status(401).json({ message: 'Not authorized as an admin' });
+    return res.status(403).json({ message: 'Faqat admin uchun ruxsat etilgan' });
   }
 };
 

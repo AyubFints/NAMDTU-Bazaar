@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Render.com'dagi haqiqiy backend manzili (kompyuter o'chiq bo'lsa ham ishlaydi)
-  baseURL: 'https://namdtu-bazaar.onrender.com/api',
+  // Local PostgreSQL backend server
+  baseURL: 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json'
   }

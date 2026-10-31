@@ -3,27 +3,22 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Agar DATABASE_URL berilgan bo'lsa (bulutli server uchun), uni ishlatamiz
-const sequelize = process.env.DATABASE_URL 
-  ? new Sequelize(process.env.DATABASE_URL, {
-      dialect: 'postgres',
-      logging: false,
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      }
-    })
-  : new Sequelize(
-      process.env.DB_NAME || 'namdtu_shop',
-      process.env.DB_USER || 'postgres',
-      process.env.DB_PASSWORD || 'postgres',
-      {
-        host: process.env.DB_HOST || 'localhost',
-        dialect: 'postgres',
-        logging: false,
-      }
-    );
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'namdtu_shop',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'ayub1953',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false,
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
 
 module.exports = sequelize;

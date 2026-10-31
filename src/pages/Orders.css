@@ -367,3 +367,101 @@
     font-size: 15px;
   }
 }
+
+/* Sold Alert & Notice */
+.orders-sold-alert-banner {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1.5px solid #10b981;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orders-sold-alert-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.orders-sold-alert-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.orders-sold-alert-content p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #047857;
+  line-height: 1.4;
+}
+
+.sold-highlight {
+  background: #10b981;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  display: inline-block;
+}
+
+.order-sold-card-notice {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.sold-check-icon {
+  background: #16a34a;
+  color: #fff;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.orders-modal-sold-box {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+
+.orders-modal-sold-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orders-modal-sold-desc {
+  font-size: 13px;
+  color: #166534;
+  margin-top: 4px;
+  line-height: 1.4;
+}
